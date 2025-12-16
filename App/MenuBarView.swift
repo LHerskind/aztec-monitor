@@ -64,13 +64,15 @@ struct MenuBarView: View {
                 Spacer()
             }
 
-            if let payload = round.payload, let shortPayload = round.shortPayload {
+            if let payload = round.payload {
                 if let url = config.explorerURL(for: payload) {
                     Link(destination: url) {
                         HStack {
                             Text("Proposal:")
                                 .foregroundColor(.primary)
-                            Text(shortPayload)
+                            Text(payload)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
                                 .foregroundColor(.blue)
                             Image(systemName: "arrow.up.right.square")
                                 .font(.caption)
@@ -128,13 +130,13 @@ struct MenuBarView: View {
             // Header row
             HStack(spacing: 6) {
                 Text("Round")
-                    .frame(width: 40, alignment: .leading)
+                    .frame(width: 44, alignment: .leading)
                 Text("Leader")
-                    .frame(width: 80, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 Text("Signals")
-                    .frame(width: 44, alignment: .trailing)
+                    .frame(width: 36, alignment: .trailing)
                 Text("Status")
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .frame(width: 70, alignment: .trailing)
             }
             .font(.caption2)
             .fontWeight(.semibold)
@@ -143,30 +145,35 @@ struct MenuBarView: View {
             ForEach(state.pastRounds) { round in
                 HStack(spacing: 6) {
                     Text("\(round.roundNumber)")
-                        .frame(width: 40, alignment: .leading)
+                        .frame(width: 44, alignment: .leading)
 
-                    if let shortPayload = round.shortPayload {
-                        Text(shortPayload)
-                            .foregroundColor(.secondary)
-                            .frame(width: 80, alignment: .leading)
+                    if let payload = round.payload,
+                       let url = config.explorerURL(for: payload) {
+                        Link(destination: url) {
+                            Text(payload)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                                .foregroundColor(.blue)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     } else {
                         Text("-")
                             .foregroundColor(.secondary)
-                            .frame(width: 80, alignment: .leading)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
 
                     if let signalCount = round.signalCount {
                         Text("\(signalCount)")
                             .foregroundColor(.secondary)
-                            .frame(width: 44, alignment: .trailing)
+                            .frame(width: 36, alignment: .trailing)
                     } else {
                         Text("-")
                             .foregroundColor(.secondary)
-                            .frame(width: 44, alignment: .trailing)
+                            .frame(width: 36, alignment: .trailing)
                     }
 
                     statusView(for: round, currentRound: state.currentRound)
-                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .frame(width: 70, alignment: .trailing)
                 }
                 .font(.caption2)
             }

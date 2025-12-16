@@ -26,14 +26,16 @@ struct LargeWidgetView: View {
 
             // Current round details
             if let round = entry.currentRound {
-                if let payload = round.payload, let shortPayload = round.shortPayload {
+                if let payload = round.payload {
                     // Proposal
                     if let url = entry.config.explorerURL(for: payload) {
                         Link(destination: url) {
                             HStack {
                                 Text("Proposal:")
                                     .foregroundColor(.primary)
-                                Text(shortPayload)
+                                Text(payload)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
                                     .foregroundColor(.blue)
                                 Image(systemName: "arrow.up.right.square")
                                     .font(.caption)
@@ -44,7 +46,9 @@ struct LargeWidgetView: View {
                     } else {
                         HStack {
                             Text("Proposal:")
-                            Text(shortPayload)
+                            Text(payload)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
                                 .foregroundColor(.secondary)
                         }
                         .font(.subheadline)
@@ -95,13 +99,13 @@ struct LargeWidgetView: View {
             // History header row
             HStack(spacing: 6) {
                 Text("Round")
-                    .frame(width: 36, alignment: .leading)
+                    .frame(width: 40, alignment: .leading)
                 Text("Leader")
-                    .frame(width: 75, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 Text("Signals")
-                    .frame(width: 44, alignment: .trailing)
+                    .frame(width: 36, alignment: .trailing)
                 Text("Status")
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .frame(width: 70, alignment: .trailing)
             }
             .font(.caption2)
             .fontWeight(.semibold)
@@ -149,19 +153,21 @@ struct RoundRowView: View {
             Text("\(round.roundNumber)")
                 .font(.caption2)
                 .fontWeight(.medium)
-                .frame(width: 36, alignment: .leading)
+                .frame(width: 40, alignment: .leading)
 
             // Proposal
-            if let shortPayload = round.shortPayload {
-                Text(shortPayload)
+            if let payload = round.payload {
+                Text(payload)
                     .font(.caption2)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
                     .foregroundColor(.secondary)
-                    .frame(width: 75, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 Text("-")
                     .font(.caption2)
                     .foregroundColor(.secondary)
-                    .frame(width: 75, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             // Signals
@@ -169,17 +175,17 @@ struct RoundRowView: View {
                 Text("\(signalCount)")
                     .font(.caption2)
                     .foregroundColor(.secondary)
-                    .frame(width: 44, alignment: .trailing)
+                    .frame(width: 36, alignment: .trailing)
             } else {
                 Text("-")
                     .font(.caption2)
                     .foregroundColor(.secondary)
-                    .frame(width: 44, alignment: .trailing)
+                    .frame(width: 36, alignment: .trailing)
             }
 
             // Status
             statusView
-                .frame(maxWidth: .infinity, alignment: .trailing)
+                .frame(width: 70, alignment: .trailing)
         }
         .padding(.vertical, 1)
     }

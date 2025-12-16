@@ -28,14 +28,16 @@ struct MediumWidgetView: View {
 
             // Content
             if let round = entry.currentRound {
-                if let payload = round.payload, let shortPayload = round.shortPayload {
+                if let payload = round.payload {
                     // Proposal link
                     if let url = entry.config.explorerURL(for: payload) {
                         Link(destination: url) {
                             HStack {
                                 Text("Proposal:")
                                     .foregroundColor(.primary)
-                                Text(shortPayload)
+                                Text(payload)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
                                     .foregroundColor(.blue)
                                 Image(systemName: "arrow.up.right.square")
                                     .font(.caption)
@@ -46,7 +48,9 @@ struct MediumWidgetView: View {
                     } else {
                         HStack {
                             Text("Proposal:")
-                            Text(shortPayload)
+                            Text(payload)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
                                 .foregroundColor(.secondary)
                         }
                         .font(.subheadline)
