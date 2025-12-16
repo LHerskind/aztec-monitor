@@ -96,26 +96,13 @@ struct LargeWidgetView: View {
             Divider()
                 .padding(.vertical, 2)
 
-            // History header row
-            HStack(spacing: 6) {
-                Text("Round")
-                    .frame(width: 40, alignment: .leading)
-                Text("Leader")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Text("Signals")
-                    .frame(width: 36, alignment: .trailing)
-                Text("Status")
-                    .frame(width: 70, alignment: .trailing)
-            }
-            .font(.caption2)
-            .fontWeight(.semibold)
-            .foregroundColor(.secondary)
-
-            // Past rounds list
+            // Past rounds table (no links in widget)
             if let state = entry.state {
-                ForEach(state.pastRounds) { round in
-                    RoundRowView(round: round, currentRound: state.currentRound, quorumSize: state.quorumSize, config: entry.config)
-                }
+                RoundsTableView(
+                    rounds: state.pastRounds,
+                    currentRound: state.currentRound,
+                    config: nil  // No clickable links in widget
+                )
             }
 
             Spacer()
@@ -134,101 +121,6 @@ struct LargeWidgetView: View {
             }
         }
         .padding()
-    }
-}
-
-struct RoundRowView: View {
-    let round: RoundData
-    let currentRound: UInt64
-    let quorumSize: UInt64
-    let config: Config
-
-    private var isPastRound: Bool {
-        round.roundNumber < currentRound
-    }
-
-    var body: some View {
-        HStack(spacing: 6) {
-            // Round number
-            Text("\(round.roundNumber)")
-                .font(.caption2)
-                .fontWeight(.medium)
-                .frame(width: 40, alignment: .leading)
-
-            // Proposal
-            if let payload = round.payload {
-                Text(payload)
-                    .font(.caption2)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                    .foregroundColor(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            } else {
-                Text("-")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-
-            // Signals
-            if let signalCount = round.signalCount {
-                Text("\(signalCount)")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .frame(width: 36, alignment: .trailing)
-            } else {
-                Text("-")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .frame(width: 36, alignment: .trailing)
-            }
-
-            // Status
-            statusView
-                .frame(width: 70, alignment: .trailing)
-        }
-        .padding(.vertical, 1)
-    }
-
-    @ViewBuilder
-    private var statusView: some View {
-        if !round.hasProposal {
-            Text("no proposal")
-                .font(.caption2)
-                .foregroundColor(.secondary)
-        } else if round.executed {
-            HStack(spacing: 2) {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
-                Text("executed")
-                    .foregroundColor(.green)
-            }
-            .font(.caption2)
-        } else if round.quorumReached {
-            HStack(spacing: 2) {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
-                Text("passed")
-                    .foregroundColor(.green)
-            }
-            .font(.caption2)
-        } else if isPastRound {
-            HStack(spacing: 2) {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(.red)
-                Text("rejected")
-                    .foregroundColor(.red)
-            }
-            .font(.caption2)
-        } else {
-            HStack(spacing: 2) {
-                Image(systemName: "clock")
-                    .foregroundColor(.orange)
-                Text("pending")
-                    .foregroundColor(.orange)
-            }
-            .font(.caption2)
-        }
     }
 }
 

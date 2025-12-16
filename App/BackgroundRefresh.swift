@@ -14,13 +14,21 @@ final class BackgroundRefresh {
         let config = Config.load()
         let interval = TimeInterval(config.pollIntervalMinutes * 60)
 
-        timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
+        // Create timer and add to common run loop mode for reliable firing in menu bar apps
+        let newTimer = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 await self?.performRefresh()
             }
         }
+        RunLoop.main.add(newTimer, forMode: .common)
+        timer = newTimer
 
         print("Background refresh started with interval: \(config.pollIntervalMinutes) minutes")
+
+        // Perform initial refresh immediately
+        Task {
+            await performRefresh()
+        }
     }
 
     func stop() {

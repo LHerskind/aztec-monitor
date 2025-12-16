@@ -9,19 +9,44 @@ struct MenuBarView: View {
         VStack(alignment: .leading, spacing: 12) {
             // Header
             HStack {
-                Text("Aztec Monitor")
+                Text("Governance Proposer")
                     .font(.headline)
                     .fontWeight(.bold)
                 Spacer()
-                if let state = currentState {
-                    Text("slot \(state.slotInRound)/\(state.roundSize)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
             }
 
             Divider()
 
+            // Main content - side by side
+            HStack(alignment: .top, spacing: 16) {
+                // Left panel - Base info
+                basePanel
+                    .frame(width: 300)
+
+                Divider()
+
+                // Right panel - Chart
+                chartPanel
+                    .frame(width: 280)
+            }
+
+            Divider()
+
+            // Footer
+            footerSection
+        }
+        .padding()
+        .frame(width: 640)
+        .onAppear {
+            refreshState()
+        }
+    }
+
+    // MARK: - Base Panel (Left)
+
+    @ViewBuilder
+    private var basePanel: some View {
+        VStack(alignment: .leading, spacing: 12) {
             // Current round section
             if let state = currentState, let round = state.currentRoundData {
                 currentRoundSection(state: state, round: round)
@@ -39,16 +64,51 @@ struct MenuBarView: View {
             if let state = currentState {
                 historySection(state: state)
             }
-
-            Divider()
-
-            // Footer
-            footerSection
         }
-        .padding()
-        .frame(width: 320)
-        .onAppear {
-            refreshState()
+    }
+
+    // MARK: - Chart Panel (Right)
+
+    @ViewBuilder
+    private var chartPanel: some View {
+        if let state = currentState {
+            VStack(alignment: .leading, spacing: 8) {
+                // Include current round in chart data
+                let allRounds = state.lastRounds
+                SignalChartView(
+                    rounds: allRounds,
+                    currentRound: state.currentRound,
+                    quorumSize: state.quorumSize
+                )
+                .frame(height: 180)
+
+                // Legend
+                legendView
+            }
+        } else {
+            Text("No data available")
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    private var legendView: some View {
+        HStack(spacing: 12) {
+            legendItem(color: .green, label: "Passed")
+            legendItem(color: .red, label: "Rejected")
+            legendItem(color: .orange, label: "Pending")
+            legendItem(color: .gray.opacity(0.5), label: "No proposal")
+        }
+        .font(.caption2)
+    }
+
+    private func legendItem(color: Color, label: String) -> some View {
+        HStack(spacing: 4) {
+            RoundedRectangle(cornerRadius: 2)
+                .fill(color)
+                .frame(width: 10, height: 10)
+            Text(label)
+                .foregroundColor(.secondary)
         }
     }
 
@@ -62,6 +122,9 @@ struct MenuBarView: View {
                     .font(.subheadline)
                     .fontWeight(.semibold)
                 Spacer()
+                Text("slot \(state.slotInRound)/\(state.roundSize)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
 
             if let payload = round.payload {
@@ -126,96 +189,11 @@ struct MenuBarView: View {
 
     @ViewBuilder
     private func historySection(state: MonitorState) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            // Header row
-            HStack(spacing: 6) {
-                Text("Round")
-                    .frame(width: 44, alignment: .leading)
-                Text("Leader")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                Text("Signals")
-                    .frame(width: 36, alignment: .trailing)
-                Text("Status")
-                    .frame(width: 70, alignment: .trailing)
-            }
-            .font(.caption2)
-            .fontWeight(.semibold)
-            .foregroundColor(.secondary)
-
-            ForEach(state.pastRounds) { round in
-                HStack(spacing: 6) {
-                    Text("\(round.roundNumber)")
-                        .frame(width: 44, alignment: .leading)
-
-                    if let payload = round.payload,
-                       let url = config.explorerURL(for: payload) {
-                        Link(destination: url) {
-                            Text(payload)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                                .foregroundColor(.blue)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    } else {
-                        Text("-")
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-
-                    if let signalCount = round.signalCount {
-                        Text("\(signalCount)")
-                            .foregroundColor(.secondary)
-                            .frame(width: 36, alignment: .trailing)
-                    } else {
-                        Text("-")
-                            .foregroundColor(.secondary)
-                            .frame(width: 36, alignment: .trailing)
-                    }
-
-                    statusView(for: round, currentRound: state.currentRound)
-                        .frame(width: 70, alignment: .trailing)
-                }
-                .font(.caption2)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func statusView(for round: RoundData, currentRound: UInt64) -> some View {
-        let isPast = round.roundNumber < currentRound
-
-        if !round.hasProposal {
-            Text("no proposal")
-                .foregroundColor(.secondary)
-        } else if round.executed {
-            HStack(spacing: 2) {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
-                Text("executed")
-                    .foregroundColor(.green)
-            }
-        } else if round.quorumReached {
-            HStack(spacing: 2) {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
-                Text("passed")
-                    .foregroundColor(.green)
-            }
-        } else if isPast {
-            HStack(spacing: 2) {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(.red)
-                Text("rejected")
-                    .foregroundColor(.red)
-            }
-        } else {
-            HStack(spacing: 2) {
-                Image(systemName: "clock")
-                    .foregroundColor(.orange)
-                Text("pending")
-                    .foregroundColor(.orange)
-            }
-        }
+        RoundsTableView(
+            rounds: state.pastRounds,
+            currentRound: state.currentRound,
+            config: config  // Enable clickable links
+        )
     }
 
     // MARK: - Footer
