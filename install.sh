@@ -2,8 +2,8 @@
 
 set -e
 
-APP_NAME="aztec-governance-widget"
-SCHEME="aztec-governance-widget"
+APP_NAME="aztec-monitor"
+SCHEME="aztec-monitor"
 CONFIGURATION="Release"
 DESTINATION="/Applications"
 
@@ -13,6 +13,7 @@ echo "🔨 Building $APP_NAME..."
 xcodebuild -scheme "$SCHEME" \
     -configuration "$CONFIGURATION" \
     -derivedDataPath build \
+    -allowProvisioningUpdates \
     clean build
 
 # Find the built app
@@ -46,11 +47,11 @@ echo ""
 echo "✅ Installation complete!"
 echo ""
 echo "To use the widget:"
-echo "  1. Open '$APP_NAME' from Applications"
-echo "  2. Configure your RPC endpoint and contract addresses"
-echo "  3. Click 'Save Configuration' then 'Refresh Now'"
-echo "  4. Add the widget to Notification Center:"
+echo "  1. The app runs in the menu bar - look for the status icon"
+echo "  2. Click the menu bar icon to view the monitor popover"
+echo "  3. Configure your RPC endpoint and contract addresses"
+echo "  4. Optionally add the widget to Notification Center:"
 echo "     - Click the date/time in menu bar"
 echo "     - Scroll to bottom and click 'Edit Widgets'"
-echo "     - Find 'Aztec Governance' and add it"
+echo "     - Find 'Aztec Monitor' and add it"
 echo ""

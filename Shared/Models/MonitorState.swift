@@ -14,7 +14,7 @@ struct MonitorState: Codable, Equatable {
 
     // MARK: - Shared Storage via App Group UserDefaults
 
-    static let appGroupID = "group.spaztec.aztec-governance-widget"
+    static let appGroupID = "group.spaztec.aztec-monitor"
     private static let stateKey = "monitorState"
 
     private static var sharedDefaults: UserDefaults {

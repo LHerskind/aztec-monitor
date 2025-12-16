@@ -18,7 +18,7 @@
 			containerPortal = 483A055E2EF0374A001F50FB /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 483A05652EF0374A001F50FB;
-			remoteInfo = "aztec-governance-widget";
+			remoteInfo = "aztec-monitor";
 		};
 		483A061D2EF05792001F50FB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -44,8 +44,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		483A05662EF0374A001F50FB /* aztec-governance-widget.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "aztec-governance-widget.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		483A059D2EF046EB001F50FB /* aztec-governance-widgetTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "aztec-governance-widgetTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		483A05662EF0374A001F50FB /* aztec-monitor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "aztec-monitor.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		483A059D2EF046EB001F50FB /* aztec-monitorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "aztec-monitorTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		483A060D2EF05791001F50FB /* AztecWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AztecWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		483A060F2EF05791001F50FB /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		483A06112EF05791001F50FB /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -118,8 +118,8 @@
 		483A05672EF0374A001F50FB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				483A05662EF0374A001F50FB /* aztec-governance-widget.app */,
-				483A059D2EF046EB001F50FB /* aztec-governance-widgetTests.xctest */,
+				483A05662EF0374A001F50FB /* aztec-monitor.app */,
+				483A059D2EF046EB001F50FB /* aztec-monitorTests.xctest */,
 				483A060D2EF05791001F50FB /* AztecWidgetExtension.appex */,
 			);
 			name = Products;
@@ -137,9 +137,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		483A05652EF0374A001F50FB /* aztec-governance-widget */ = {
+		483A05652EF0374A001F50FB /* aztec-monitor */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 483A05712EF0374B001F50FB /* Build configuration list for PBXNativeTarget "aztec-governance-widget" */;
+			buildConfigurationList = 483A05712EF0374B001F50FB /* Build configuration list for PBXNativeTarget "aztec-monitor" */;
 			buildPhases = (
 				483A05622EF0374A001F50FB /* Sources */,
 				483A05632EF0374A001F50FB /* Frameworks */,
@@ -155,16 +155,16 @@
 				483A05682EF0374A001F50FB /* App */,
 				483A07002EF05800001F50FB /* Shared */,
 			);
-			name = "aztec-governance-widget";
+			name = "aztec-monitor";
 			packageProductDependencies = (
 			);
-			productName = "aztec-governance-widget";
-			productReference = 483A05662EF0374A001F50FB /* aztec-governance-widget.app */;
+			productName = "aztec-monitor";
+			productReference = 483A05662EF0374A001F50FB /* aztec-monitor.app */;
 			productType = "com.apple.product-type.application";
 		};
-		483A059C2EF046EB001F50FB /* aztec-governance-widgetTests */ = {
+		483A059C2EF046EB001F50FB /* aztec-monitorTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 483A05A32EF046EB001F50FB /* Build configuration list for PBXNativeTarget "aztec-governance-widgetTests" */;
+			buildConfigurationList = 483A05A32EF046EB001F50FB /* Build configuration list for PBXNativeTarget "aztec-monitorTests" */;
 			buildPhases = (
 				483A05992EF046EB001F50FB /* Sources */,
 				483A059A2EF046EB001F50FB /* Frameworks */,
@@ -178,11 +178,11 @@
 			fileSystemSynchronizedGroups = (
 				483A059E2EF046EB001F50FB /* Tests */,
 			);
-			name = "aztec-governance-widgetTests";
+			name = "aztec-monitorTests";
 			packageProductDependencies = (
 			);
-			productName = "aztec-governance-widgetTests";
-			productReference = 483A059D2EF046EB001F50FB /* aztec-governance-widgetTests.xctest */;
+			productName = "aztec-monitorTests";
+			productReference = 483A059D2EF046EB001F50FB /* aztec-monitorTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		483A060C2EF05791001F50FB /* AztecWidgetExtension */ = {
@@ -230,7 +230,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 483A05612EF0374A001F50FB /* Build configuration list for PBXProject "aztec-governance-widget" */;
+			buildConfigurationList = 483A05612EF0374A001F50FB /* Build configuration list for PBXProject "aztec-monitor" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -244,9 +244,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				483A05652EF0374A001F50FB /* aztec-governance-widget */,
+				483A05652EF0374A001F50FB /* aztec-monitor */,
 				483A060C2EF05791001F50FB /* AztecWidgetExtension */,
-				483A059C2EF046EB001F50FB /* aztec-governance-widgetTests */,
+				483A059C2EF046EB001F50FB /* aztec-monitorTests */,
 			);
 		};
 /* End PBXProject section */
@@ -302,7 +302,7 @@
 /* Begin PBXTargetDependency section */
 		483A05A22EF046EB001F50FB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 483A05652EF0374A001F50FB /* aztec-governance-widget */;
+			target = 483A05652EF0374A001F50FB /* aztec-monitor */;
 			targetProxy = 483A05A12EF046EB001F50FB /* PBXContainerItemProxy */;
 		};
 		483A061E2EF05792001F50FB /* PBXTargetDependency */ = {
@@ -434,7 +434,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "App/aztec-governance-widget.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "App/aztec-monitor.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = HYUKR8QQ3V;
@@ -469,7 +469,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "spaztec.aztec-governance-widget";
+				PRODUCT_BUNDLE_IDENTIFIER = "spaztec.aztec-monitor";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -490,7 +490,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "App/aztec-governance-widget.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "App/aztec-monitor.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = HYUKR8QQ3V;
@@ -525,7 +525,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "spaztec.aztec-governance-widget";
+				PRODUCT_BUNDLE_IDENTIFIER = "spaztec.aztec-monitor";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -552,7 +552,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "spaztec.aztec-governance-widgetTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "spaztec.aztec-monitorTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -560,7 +560,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/aztec-governance-widget.app/Contents/MacOS/aztec-governance-widget";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/aztec-monitor.app/Contents/MacOS/aztec-monitor";
 			};
 			name = Debug;
 		};
@@ -575,7 +575,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "spaztec.aztec-governance-widgetTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "spaztec.aztec-monitorTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -583,7 +583,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/aztec-governance-widget.app/Contents/MacOS/aztec-governance-widget";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/aztec-monitor.app/Contents/MacOS/aztec-monitor";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -609,7 +609,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "spaztec.aztec-governance-widget.AztecWidget";
+				PRODUCT_BUNDLE_IDENTIFIER = "spaztec.aztec-monitor.AztecWidget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
@@ -645,7 +645,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "spaztec.aztec-governance-widget.AztecWidget";
+				PRODUCT_BUNDLE_IDENTIFIER = "spaztec.aztec-monitor.AztecWidget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
@@ -663,7 +663,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		483A05612EF0374A001F50FB /* Build configuration list for PBXProject "aztec-governance-widget" */ = {
+		483A05612EF0374A001F50FB /* Build configuration list for PBXProject "aztec-monitor" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				483A056F2EF0374B001F50FB /* Debug */,
@@ -672,7 +672,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		483A05712EF0374B001F50FB /* Build configuration list for PBXNativeTarget "aztec-governance-widget" */ = {
+		483A05712EF0374B001F50FB /* Build configuration list for PBXNativeTarget "aztec-monitor" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				483A05722EF0374B001F50FB /* Debug */,
@@ -681,7 +681,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		483A05A32EF046EB001F50FB /* Build configuration list for PBXNativeTarget "aztec-governance-widgetTests" */ = {
+		483A05A32EF046EB001F50FB /* Build configuration list for PBXNativeTarget "aztec-monitorTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				483A05A42EF046EB001F50FB /* Debug */,

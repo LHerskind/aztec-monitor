@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "483A05652EF0374A001F50FB"
-               BuildableName = "aztec-governance-widget.app"
-               BlueprintName = "aztec-governance-widget"
-               ReferencedContainer = "container:aztec-governance-widget.xcodeproj">
+               BuildableName = "aztec-monitor.app"
+               BlueprintName = "aztec-monitor"
+               ReferencedContainer = "container:aztec-monitor.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -35,9 +35,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "483A059C2EF046EB001F50FB"
-               BuildableName = "aztec-governance-widgetTests.xctest"
-               BlueprintName = "aztec-governance-widgetTests"
-               ReferencedContainer = "container:aztec-governance-widget.xcodeproj">
+               BuildableName = "aztec-monitorTests.xctest"
+               BlueprintName = "aztec-monitorTests"
+               ReferencedContainer = "container:aztec-monitor.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -57,9 +57,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "483A05652EF0374A001F50FB"
-            BuildableName = "aztec-governance-widget.app"
-            BlueprintName = "aztec-governance-widget"
-            ReferencedContainer = "container:aztec-governance-widget.xcodeproj">
+            BuildableName = "aztec-monitor.app"
+            BlueprintName = "aztec-monitor"
+            ReferencedContainer = "container:aztec-monitor.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -74,9 +74,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "483A05652EF0374A001F50FB"
-            BuildableName = "aztec-governance-widget.app"
-            BlueprintName = "aztec-governance-widget"
-            ReferencedContainer = "container:aztec-governance-widget.xcodeproj">
+            BuildableName = "aztec-monitor.app"
+            BlueprintName = "aztec-monitor"
+            ReferencedContainer = "container:aztec-monitor.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
