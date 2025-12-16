@@ -13,6 +13,7 @@ struct MonitorState: Codable, Equatable {
     var notifiedQuorums: Set<String>
     var governanceData: GovernanceData?
     var gseData: GSEData?
+    var rollupData: RollupData?
 
     // MARK: - Shared Storage via App Group UserDefaults
 
@@ -89,6 +90,7 @@ struct MonitorState: Codable, Equatable {
         notifiedProposals: [],
         notifiedQuorums: [],
         governanceData: nil,
-        gseData: nil
+        gseData: nil,
+        rollupData: nil
     )
 }

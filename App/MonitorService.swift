@@ -60,6 +60,9 @@ struct MonitorService {
         // Fetch GSE data
         let gseData = try await fetchGSEData()
 
+        // Fetch rollup data
+        let rollupData = try await fetchRollupData()
+
         return MonitorState(
             currentRound: currentRound,
             currentSlot: currentSlot,
@@ -71,7 +74,8 @@ struct MonitorService {
             notifiedProposals: [],
             notifiedQuorums: [],
             governanceData: governanceData,
-            gseData: gseData
+            gseData: gseData,
+            rollupData: rollupData
         )
     }
 
@@ -116,6 +120,47 @@ struct MonitorService {
             bonusAttesterCount: bonusAttesterCount,
             rollupAttesterCountRaw: rollupAttesterCount,
             rollupIsCanonical: rollupIsCanonical
+        )
+    }
+
+    private func fetchRollupData() async throws -> RollupData {
+        let pendingBlockNumber = try await rollup.getPendingBlockNumber()
+        let provenBlockNumber = try await rollup.getProvenBlockNumber()
+        let targetCommitteeSize = try await rollup.getTargetCommitteeSize()
+        let blockReward = try await rollup.getBlockReward()
+        let entryQueueLength = try await rollup.getEntryQueueLength()
+        let genesisTime = try await rollup.getGenesisTime()
+        let slotDuration = try await rollup.getSlotDuration()
+
+        // Fetch recent blocks to calculate average block time
+        var recentBlockSlots: [UInt64] = []
+        let blocksToFetch = min(16, pendingBlockNumber)
+
+        for i in 0..<blocksToFetch {
+            let blockNum = pendingBlockNumber - i
+            if blockNum == 0 { break }
+
+            do {
+                let blockData = try await rollup.getBlock(blockNumber: blockNum)
+                if let slot = Rollup.parseSlotFromBlockData(blockData) {
+                    recentBlockSlots.append(slot)
+                }
+            } catch {
+                // Skip blocks that fail to fetch
+                continue
+            }
+        }
+
+        return RollupData(
+            pendingBlockNumber: pendingBlockNumber,
+            provenBlockNumber: provenBlockNumber,
+            targetCommitteeSize: targetCommitteeSize,
+            blockReward: blockReward,
+            entryQueueLength: entryQueueLength,
+            genesisTime: genesisTime,
+            slotDuration: slotDuration,
+            recentBlockSlots: recentBlockSlots,
+            fetchedAt: Date()
         )
     }
 }

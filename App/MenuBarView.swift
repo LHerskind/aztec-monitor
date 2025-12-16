@@ -299,10 +299,119 @@ struct MenuBarView: View {
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
 
-            // Placeholder for future rollup-specific data
-            Text("Coming soon...")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            if let rollup = currentState?.rollupData {
+                // Block numbers
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Pending Block:")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(rollup.formattedPendingBlockNumber)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+
+                    HStack {
+                        Text("Proven Block:")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(rollup.formattedProvenBlockNumber)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+
+                    if rollup.unprovenBlocks > 0 {
+                        HStack {
+                            Text("Unproven:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("\(rollup.unprovenBlocks)")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(.orange)
+                        }
+                    }
+                }
+
+                Divider()
+
+                // Block timing
+                VStack(alignment: .leading, spacing: 4) {
+                    if let avgTime = rollup.formattedAverageBlockTime {
+                        HStack {
+                            Text("Avg Block Time (last \(rollup.blocksInAverage)):")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(avgTime)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+                    }
+
+                    if let lastBlock = rollup.formattedTimeSinceLastBlock {
+                        HStack {
+                            Text("Last Block:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(lastBlock)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+                    }
+
+                    // Slot strip visualization
+                    if !rollup.recentBlockSlots.isEmpty, let state = currentState {
+                        SlotStripView(
+                            blockSlots: rollup.recentBlockSlots,
+                            currentSlot: state.currentSlot
+                        )
+                    }
+                }
+
+                Divider()
+
+                // Committee and rewards
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Committee Size:")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text("\(rollup.targetCommitteeSize)")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+
+                    HStack {
+                        Text("Block Reward:")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(rollup.formattedBlockReward)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+
+                    HStack {
+                        Text("Entry Queue:")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text("\(rollup.entryQueueLength)")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+                }
+            } else {
+                Text("No data")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
         }
     }
 
