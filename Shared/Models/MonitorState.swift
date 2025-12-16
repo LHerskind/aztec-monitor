@@ -52,8 +52,12 @@ struct MonitorState: Codable, Equatable {
         rounds.first { $0.roundNumber == currentRound }
     }
 
-    var lastFiveRounds: [RoundData] {
-        Array(rounds.prefix(5))
+    var lastRounds: [RoundData] {
+        Array(rounds.prefix(10))
+    }
+
+    var pastRounds: [RoundData] {
+        Array(rounds.dropFirst().prefix(7))
     }
 
     var formattedFetchTime: String {

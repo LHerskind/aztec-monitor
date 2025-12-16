@@ -7,8 +7,6 @@ struct AztecWidgetEntryView: View {
 
     var body: some View {
         switch widgetFamily {
-        case .systemSmall:
-            SmallWidgetView(entry: entry)
         case .systemMedium:
             MediumWidgetView(entry: entry)
         case .systemLarge:
@@ -29,14 +27,8 @@ struct AztecWidget: Widget {
         }
         .configurationDisplayName("Aztec Governance")
         .description("Monitor governance round status")
-        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+        .supportedFamilies([.systemMedium, .systemLarge])
     }
-}
-
-#Preview(as: .systemSmall) {
-    AztecWidget()
-} timeline: {
-    RoundEntry.preview
 }
 
 #Preview(as: .systemMedium) {

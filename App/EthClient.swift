@@ -143,7 +143,7 @@ extension EthClient {
 
         var rounds: [RoundData] = []
 
-        let startRound = currentRound >= 4 ? currentRound - 4 : 0
+        let startRound = currentRound >= 8 ? currentRound - 8 : 0
 
         for roundNum in stride(from: currentRound, through: startRound, by: -1) {
             let (slot, payload, executed) = try await getRoundData(

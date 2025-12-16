@@ -6,14 +6,19 @@ struct MediumWidgetView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // Title
+            Text("Aztec Governance Proposer Monitor")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
             // Header
             HStack {
                 Text("Round \(entry.state?.currentRound ?? 0)")
                     .font(.headline)
                     .fontWeight(.bold)
                 Spacer()
-                if let round = entry.currentRound, let roundSize = entry.state?.roundSize {
-                    Text("slot \(round.slotNumber)/\(roundSize)")
+                if let state = entry.state {
+                    Text("slot \(state.slotInRound)/\(state.roundSize)")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
@@ -49,39 +54,29 @@ struct MediumWidgetView: View {
 
                     // Progress bar
                     if let signalCount = round.signalCount, let quorumSize = entry.state?.quorumSize {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text("Signals:")
-                                    .font(.caption)
-                                GeometryReader { geometry in
-                                    ZStack(alignment: .leading) {
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .fill(Color.gray.opacity(0.3))
-                                            .frame(height: 8)
-
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .fill(round.quorumReached ? Color.green : Color.blue)
-                                            .frame(
-                                                width: geometry.size.width * min(1.0, CGFloat(signalCount) / CGFloat(quorumSize)),
-                                                height: 8
-                                            )
-                                    }
-                                }
-                                .frame(height: 8)
-
-                                Text("\(signalCount)/\(quorumSize)")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-
-                        // Status
                         HStack {
-                            Text("Status:")
+                            Text("Signals:")
                                 .font(.caption)
-                            Text(round.statusText)
+                            GeometryReader { geometry in
+                                ZStack(alignment: .leading) {
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(Color.gray.opacity(0.3))
+                                        .frame(height: 8)
+
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(round.quorumReached ? Color.green : Color.blue)
+                                        .frame(
+                                            width: geometry.size.width * min(1.0, CGFloat(signalCount) / CGFloat(quorumSize)),
+                                            height: 8
+                                        )
+                                }
+                            }
+                            .frame(height: 8)
+
+                            Text("\(signalCount)/\(quorumSize)")
                                 .font(.caption)
                                 .foregroundColor(round.quorumReached ? .green : .secondary)
+
                             if round.quorumReached {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundColor(.green)

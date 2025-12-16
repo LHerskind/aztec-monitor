@@ -5,44 +5,128 @@ struct LargeWidgetView: View {
     let entry: RoundEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
+            // Title
+            Text("Aztec Governance Proposer Monitor")
+                .font(.caption)
+                .foregroundColor(.secondary)
+
             // Header
-            Text("Round Monitor")
-                .font(.headline)
-                .fontWeight(.bold)
+            HStack {
+                Text("Round \(entry.state?.currentRound ?? 0)")
+                    .font(.headline)
+                    .fontWeight(.bold)
+                Spacer()
+                if let state = entry.state {
+                    Text("slot \(state.slotInRound)/\(state.roundSize)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            // Current round details
+            if let round = entry.currentRound {
+                if let payload = round.payload, let shortPayload = round.shortPayload {
+                    // Proposal
+                    if let url = entry.config.explorerURL(for: payload) {
+                        Link(destination: url) {
+                            HStack {
+                                Text("Proposal:")
+                                    .foregroundColor(.primary)
+                                Text(shortPayload)
+                                    .foregroundColor(.blue)
+                                Image(systemName: "arrow.up.right.square")
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
+                            }
+                            .font(.subheadline)
+                        }
+                    } else {
+                        HStack {
+                            Text("Proposal:")
+                            Text(shortPayload)
+                                .foregroundColor(.secondary)
+                        }
+                        .font(.subheadline)
+                    }
+
+                    // Progress bar
+                    if let signalCount = round.signalCount, let quorumSize = entry.state?.quorumSize {
+                        HStack {
+                            Text("Signals:")
+                                .font(.caption)
+                            GeometryReader { geometry in
+                                ZStack(alignment: .leading) {
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(Color.gray.opacity(0.3))
+                                        .frame(height: 8)
+
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(round.quorumReached ? Color.green : Color.blue)
+                                        .frame(
+                                            width: geometry.size.width * min(1.0, CGFloat(signalCount) / CGFloat(quorumSize)),
+                                            height: 8
+                                        )
+                                }
+                            }
+                            .frame(height: 8)
+
+                            Text("\(signalCount)/\(quorumSize)")
+                                .font(.caption)
+                                .foregroundColor(round.quorumReached ? .green : .secondary)
+
+                            if round.quorumReached {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                    .font(.caption)
+                            }
+                        }
+                    }
+                } else {
+                    Text("No proposal yet")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            }
 
             Divider()
+                .padding(.vertical, 2)
 
-            // Rounds list
+            // History header row
+            HStack(spacing: 6) {
+                Text("Round")
+                    .frame(width: 36, alignment: .leading)
+                Text("Leader")
+                    .frame(width: 75, alignment: .leading)
+                Text("Signals")
+                    .frame(width: 44, alignment: .trailing)
+                Text("Status")
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+            .font(.caption2)
+            .fontWeight(.semibold)
+            .foregroundColor(.secondary)
+
+            // Past rounds list
             if let state = entry.state {
-                ForEach(state.lastFiveRounds) { round in
-                    RoundRowView(round: round, quorumSize: state.quorumSize, config: entry.config)
+                ForEach(state.pastRounds) { round in
+                    RoundRowView(round: round, currentRound: state.currentRound, quorumSize: state.quorumSize, config: entry.config)
                 }
-            } else {
-                Text("No data available")
-                    .foregroundColor(.secondary)
-                    .padding()
             }
 
             Spacer()
 
-            Divider()
-
-            // Footer with debug info
-            VStack(alignment: .leading, spacing: 2) {
-                if let state = entry.state {
-                    Text("Round \(state.currentRound) - \(state.formattedFetchTime)")
-                        .font(.caption2)
-                        .foregroundColor(.green)
-                } else {
-                    Text("State: nil (exists: \(entry.stateFileExists ? "yes" : "no"))")
-                        .font(.caption2)
-                        .foregroundColor(.red)
-                }
-                Text("Path: \(entry.debugPath)")
+            // Footer
+            HStack {
+                Text("Updated: \(entry.state?.formattedFetchTime ?? "--:--")")
                     .font(.caption2)
                     .foregroundColor(.secondary)
-                    .lineLimit(1)
+                if let blockNumber = entry.state?.formattedBlockNumber {
+                    Spacer()
+                    Text("block \(blockNumber)")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
             }
         }
         .padding()
@@ -51,57 +135,53 @@ struct LargeWidgetView: View {
 
 struct RoundRowView: View {
     let round: RoundData
+    let currentRound: UInt64
     let quorumSize: UInt64
     let config: Config
 
+    private var isPastRound: Bool {
+        round.roundNumber < currentRound
+    }
+
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             // Round number
-            Text("R\(round.roundNumber)")
-                .font(.caption)
+            Text("\(round.roundNumber)")
+                .font(.caption2)
                 .fontWeight(.medium)
-                .frame(width: 40, alignment: .leading)
+                .frame(width: 36, alignment: .leading)
 
             // Proposal
-            if let payload = round.payload, let shortPayload = round.shortPayload {
-                if let url = config.explorerURL(for: payload) {
-                    Link(destination: url) {
-                        Text(shortPayload)
-                            .font(.caption)
-                            .foregroundColor(.blue)
-                    }
-                    .frame(width: 80, alignment: .leading)
-                } else {
-                    Text(shortPayload)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .frame(width: 80, alignment: .leading)
-                }
+            if let shortPayload = round.shortPayload {
+                Text(shortPayload)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .frame(width: 75, alignment: .leading)
             } else {
                 Text("-")
-                    .font(.caption)
+                    .font(.caption2)
                     .foregroundColor(.secondary)
-                    .frame(width: 80, alignment: .leading)
+                    .frame(width: 75, alignment: .leading)
             }
 
             // Signals
             if let signalCount = round.signalCount {
-                Text("\(signalCount)/\(quorumSize)")
-                    .font(.caption)
+                Text("\(signalCount)")
+                    .font(.caption2)
                     .foregroundColor(.secondary)
-                    .frame(width: 45, alignment: .trailing)
+                    .frame(width: 44, alignment: .trailing)
             } else {
                 Text("-")
-                    .font(.caption)
+                    .font(.caption2)
                     .foregroundColor(.secondary)
-                    .frame(width: 45, alignment: .trailing)
+                    .frame(width: 44, alignment: .trailing)
             }
 
             // Status
             statusView
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 1)
     }
 
     @ViewBuilder
@@ -122,13 +202,21 @@ struct RoundRowView: View {
             HStack(spacing: 2) {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundColor(.green)
-                Text("quorum")
+                Text("passed")
                     .foregroundColor(.green)
+            }
+            .font(.caption2)
+        } else if isPastRound {
+            HStack(spacing: 2) {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundColor(.red)
+                Text("rejected")
+                    .foregroundColor(.red)
             }
             .font(.caption2)
         } else {
             HStack(spacing: 2) {
-                Image(systemName: "xmark.circle")
+                Image(systemName: "clock")
                     .foregroundColor(.orange)
                 Text("pending")
                     .foregroundColor(.orange)
