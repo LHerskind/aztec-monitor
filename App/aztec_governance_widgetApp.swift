@@ -1,12 +1,21 @@
 import SwiftUI
 
 @main
-struct AztecGovernanceWidgetApp: App {
+struct AztecMonitorApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        // Menu bar app with popover
+        MenuBarExtra {
+            MenuBarView()
+        } label: {
+            Image("MenuBarIcon")
+        }
+        .menuBarExtraStyle(.window)
+
+        // Settings window (optional, can open from menu bar)
+        Settings {
+            SettingsView()
         }
     }
 }
