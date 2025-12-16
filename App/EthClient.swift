@@ -23,6 +23,65 @@ enum EthError: Error, LocalizedError {
     }
 }
 
+// MARK: - ABI Encoding/Decoding Utilities
+
+enum ABI {
+    static let zeroAddress = "0x0000000000000000000000000000000000000000"
+
+    // MARK: - Encoding
+
+    static func encodeAddress(_ address: String) -> String {
+        let cleaned = address.hasPrefix("0x") ? String(address.dropFirst(2)) : address
+        let padded = String(repeating: "0", count: 64 - cleaned.count) + cleaned.lowercased()
+        return padded
+    }
+
+    static func encodeUint256(_ value: UInt64) -> String {
+        String(format: "%064x", value)
+    }
+
+    // MARK: - Decoding
+
+    static func parseUint256(_ hex: String) -> UInt64 {
+        let cleaned = hex.hasPrefix("0x") ? String(hex.dropFirst(2)) : hex
+        // Take only the last 16 hex chars (64 bits) for UInt64
+        let truncated = cleaned.count > 16 ? String(cleaned.suffix(16)) : cleaned
+        return UInt64(truncated, radix: 16) ?? 0
+    }
+
+    static func parseUint32(_ hex: String, byteOffset: Int) -> UInt32 {
+        let cleaned = hex.hasPrefix("0x") ? String(hex.dropFirst(2)) : hex
+        let charOffset = byteOffset * 2
+        let startIndex = cleaned.index(cleaned.startIndex, offsetBy: charOffset)
+        let endIndex = cleaned.index(startIndex, offsetBy: 64)
+        let slice = String(cleaned[startIndex..<endIndex])
+        // Take last 8 hex chars for UInt32
+        let truncated = slice.count > 8 ? String(slice.suffix(8)) : slice
+        return UInt32(truncated, radix: 16) ?? 0
+    }
+
+    static func parseAddress(_ hex: String, byteOffset: Int) -> String {
+        let cleaned = hex.hasPrefix("0x") ? String(hex.dropFirst(2)) : hex
+        let charOffset = byteOffset * 2
+        let startIndex = cleaned.index(cleaned.startIndex, offsetBy: charOffset)
+        let endIndex = cleaned.index(startIndex, offsetBy: 64)
+        let slice = String(cleaned[startIndex..<endIndex])
+        // Address is last 20 bytes (40 hex chars) of 32 byte slot
+        let address = "0x" + String(slice.suffix(40))
+        return address
+    }
+
+    static func parseBool(_ hex: String, byteOffset: Int) -> Bool {
+        let cleaned = hex.hasPrefix("0x") ? String(hex.dropFirst(2)) : hex
+        let charOffset = byteOffset * 2
+        let startIndex = cleaned.index(cleaned.startIndex, offsetBy: charOffset)
+        let endIndex = cleaned.index(startIndex, offsetBy: 64)
+        let slice = String(cleaned[startIndex..<endIndex])
+        // Bool is non-zero value
+        return slice.contains { $0 != "0" }
+    }
+}
+
 actor EthClient {
     private let rpcEndpoint: URL
     private let session: URLSession
@@ -90,101 +149,3 @@ actor EthClient {
     }
 }
 
-// MARK: - Contract-specific methods
-
-extension EthClient {
-    func getCurrentRound(contract: String) async throws -> UInt64 {
-        let result = try await call(to: contract, data: ContractCalls.getCurrentRound)
-        return ContractCalls.parseUint256(result)
-    }
-
-    func getRoundData(
-        contract: String,
-        instance: String,
-        round: UInt64
-    ) async throws -> (slot: UInt32, payload: String?, executed: Bool) {
-        let calldata = ContractCalls.encodeGetRoundData(instance: instance, round: round)
-        let result = try await call(to: contract, data: calldata)
-        return ContractCalls.decodeGetRoundData(result)
-    }
-
-    func getSignalCount(
-        contract: String,
-        instance: String,
-        round: UInt64,
-        payload: String
-    ) async throws -> UInt64 {
-        let calldata = ContractCalls.encodeSignalCount(instance: instance, round: round, payload: payload)
-        let result = try await call(to: contract, data: calldata)
-        return ContractCalls.parseUint256(result)
-    }
-
-    func getQuorumSize(contract: String) async throws -> UInt64 {
-        let result = try await call(to: contract, data: ContractCalls.quorumSize)
-        return ContractCalls.parseUint256(result)
-    }
-
-    func getRoundSize(contract: String) async throws -> UInt64 {
-        let result = try await call(to: contract, data: ContractCalls.roundSize)
-        return ContractCalls.parseUint256(result)
-    }
-
-    func getCurrentSlot(rollup: String) async throws -> UInt64 {
-        let result = try await call(to: rollup, data: ContractCalls.getCurrentSlot)
-        return ContractCalls.parseUint256(result)
-    }
-
-    func fetchCurrentState(config: Config) async throws -> MonitorState {
-        let blockNumber = try await getBlockNumber()
-        let currentRound = try await getCurrentRound(contract: config.contractAddress)
-        let currentSlot = try await getCurrentSlot(rollup: config.instanceAddress)
-        let quorumSize = try await getQuorumSize(contract: config.contractAddress)
-        let roundSize = try await getRoundSize(contract: config.contractAddress)
-
-        var rounds: [RoundData] = []
-
-        let startRound = currentRound >= 8 ? currentRound - 8 : 0
-
-        for roundNum in stride(from: currentRound, through: startRound, by: -1) {
-            let (slot, payload, executed) = try await getRoundData(
-                contract: config.contractAddress,
-                instance: config.instanceAddress,
-                round: roundNum
-            )
-
-            var signalCount: UInt64? = nil
-            var quorumReached = false
-
-            if let payload = payload {
-                signalCount = try await getSignalCount(
-                    contract: config.contractAddress,
-                    instance: config.instanceAddress,
-                    round: roundNum,
-                    payload: payload
-                )
-                quorumReached = signalCount! >= quorumSize
-            }
-
-            rounds.append(RoundData(
-                roundNumber: roundNum,
-                slotNumber: slot,
-                payload: payload,
-                executed: executed,
-                signalCount: signalCount,
-                quorumReached: quorumReached
-            ))
-        }
-
-        return MonitorState(
-            currentRound: currentRound,
-            currentSlot: currentSlot,
-            rounds: rounds,
-            quorumSize: quorumSize,
-            roundSize: roundSize,
-            fetchedAt: Date(),
-            blockNumber: blockNumber,
-            notifiedProposals: [],
-            notifiedQuorums: []
-        )
-    }
-}

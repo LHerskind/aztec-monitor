@@ -3,8 +3,9 @@ import WidgetKit
 
 struct Config: Codable, Equatable {
     var rpcEndpoint: String
-    var contractAddress: String
-    var instanceAddress: String
+    var governanceProposerAddress: String
+    var governanceAddress: String
+    var rollupAddress: String
     var explorerBaseURL: String
     var pollIntervalMinutes: Int
     var notifyOnNewProposal: Bool
@@ -36,8 +37,9 @@ struct Config: Codable, Equatable {
 
     static let `default` = Config(
         rpcEndpoint: "http://localhost:8545",
-        contractAddress: "0x06Ef1DcF87E419C48B94a331B252819FADbD63ef",
-        instanceAddress: "0x603bb2c05D474794ea97805e8De69bCcFb3bCA12",
+        governanceProposerAddress: "0x06Ef1DcF87E419C48B94a331B252819FADbD63ef",
+        governanceAddress: "0x1102471Eb3378FEE427121c9EfcEa452E4B6B75e",
+        rollupAddress: "0x603bb2c05D474794ea97805e8De69bCcFb3bCA12",
         explorerBaseURL: "https://etherscan.io/address/",
         pollIntervalMinutes: 60,
         notifyOnNewProposal: true,
@@ -46,8 +48,9 @@ struct Config: Codable, Equatable {
 
     var isValid: Bool {
         !rpcEndpoint.isEmpty &&
-        contractAddress.hasPrefix("0x") && contractAddress.count == 42 &&
-        instanceAddress.hasPrefix("0x") && instanceAddress.count == 42 &&
+        governanceProposerAddress.hasPrefix("0x") && governanceProposerAddress.count == 42 &&
+        governanceAddress.hasPrefix("0x") && governanceAddress.count == 42 &&
+        rollupAddress.hasPrefix("0x") && rollupAddress.count == 42 &&
         !explorerBaseURL.isEmpty &&
         pollIntervalMinutes > 0
     }
@@ -56,13 +59,18 @@ struct Config: Codable, Equatable {
         URL(string: explorerBaseURL + address)
     }
 
-    var shortContractAddress: String {
-        guard contractAddress.count > 10 else { return contractAddress }
-        return String(contractAddress.prefix(6)) + "..." + String(contractAddress.suffix(4))
+    var shortGovernanceProposerAddress: String {
+        guard governanceProposerAddress.count > 10 else { return governanceProposerAddress }
+        return String(governanceProposerAddress.prefix(6)) + "..." + String(governanceProposerAddress.suffix(4))
     }
 
-    var shortInstanceAddress: String {
-        guard instanceAddress.count > 10 else { return instanceAddress }
-        return String(instanceAddress.prefix(6)) + "..." + String(instanceAddress.suffix(4))
+    var shortGovernanceAddress: String {
+        guard governanceAddress.count > 10 else { return governanceAddress }
+        return String(governanceAddress.prefix(6)) + "..." + String(governanceAddress.suffix(4))
+    }
+
+    var shortRollupAddress: String {
+        guard rollupAddress.count > 10 else { return rollupAddress }
+        return String(rollupAddress.prefix(6)) + "..." + String(rollupAddress.suffix(4))
     }
 }

@@ -50,7 +50,8 @@ final class BackgroundRefresh {
 
         do {
             let ethClient = try EthClient(rpcEndpoint: config.rpcEndpoint)
-            var newState = try await ethClient.fetchCurrentState(config: config)
+            let monitorService = MonitorService(client: ethClient, config: config)
+            var newState = try await monitorService.fetchCurrentState()
 
             // Preserve notification tracking
             let previousState = MonitorState.load()

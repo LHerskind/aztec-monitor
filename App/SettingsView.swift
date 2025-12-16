@@ -10,13 +10,20 @@ struct SettingsView: View {
             Section("RPC Configuration") {
                 TextField("RPC Endpoint", text: $config.rpcEndpoint)
                     .textFieldStyle(.roundedBorder)
+            }
 
-                TextField("Contract Address", text: $config.contractAddress)
+            Section("Contract Addresses") {
+                TextField("Governance Proposer", text: $config.governanceProposerAddress)
                     .textFieldStyle(.roundedBorder)
 
-                TextField("Instance Address", text: $config.instanceAddress)
+                TextField("Governance", text: $config.governanceAddress)
                     .textFieldStyle(.roundedBorder)
 
+                TextField("Rollup", text: $config.rollupAddress)
+                    .textFieldStyle(.roundedBorder)
+            }
+
+            Section("Explorer") {
                 TextField("Block Explorer URL", text: $config.explorerBaseURL)
                     .textFieldStyle(.roundedBorder)
             }
@@ -50,7 +57,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 450, height: 400)
+        .frame(width: 450, height: 480)
         .onChange(of: config) { _, _ in
             isSaved = false
         }

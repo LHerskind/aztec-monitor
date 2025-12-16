@@ -248,7 +248,8 @@ struct MenuBarView: View {
 
         do {
             let ethClient = try EthClient(rpcEndpoint: config.rpcEndpoint)
-            var newState = try await ethClient.fetchCurrentState(config: config)
+            let monitorService = MonitorService(client: ethClient, config: config)
+            var newState = try await monitorService.fetchCurrentState()
 
             if let previous = MonitorState.load() {
                 newState.notifiedProposals = previous.notifiedProposals
