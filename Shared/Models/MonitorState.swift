@@ -11,6 +11,8 @@ struct MonitorState: Codable, Equatable {
     let blockNumber: UInt64
     var notifiedProposals: Set<String>
     var notifiedQuorums: Set<String>
+    var governanceData: GovernanceData?
+    var gseData: GSEData?
 
     // MARK: - Shared Storage via App Group UserDefaults
 
@@ -85,6 +87,8 @@ struct MonitorState: Codable, Equatable {
         fetchedAt: Date(),
         blockNumber: 0,
         notifiedProposals: [],
-        notifiedQuorums: []
+        notifiedQuorums: [],
+        governanceData: nil,
+        gseData: nil
     )
 }

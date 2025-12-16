@@ -49,6 +49,27 @@ enum ABI {
         return UInt64(truncated, radix: 16) ?? 0
     }
 
+    static func parseUint256AsDouble(_ hex: String, decimals: Int = 18) -> Double {
+        let cleaned = hex.hasPrefix("0x") ? String(hex.dropFirst(2)) : hex
+        // Parse full 256-bit value using Decimal for precision
+        guard let value = Double("0x" + cleaned) ?? parseHexToDouble(cleaned) else {
+            return 0
+        }
+        let divisor = pow(10.0, Double(decimals))
+        return value / divisor
+    }
+
+    private static func parseHexToDouble(_ hex: String) -> Double? {
+        // Parse hex string chunk by chunk to handle large numbers
+        var result: Double = 0
+        let base: Double = 16
+        for char in hex {
+            guard let digit = Int(String(char), radix: 16) else { return nil }
+            result = result * base + Double(digit)
+        }
+        return result
+    }
+
     static func parseUint32(_ hex: String, byteOffset: Int) -> UInt32 {
         let cleaned = hex.hasPrefix("0x") ? String(hex.dropFirst(2)) : hex
         let charOffset = byteOffset * 2

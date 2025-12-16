@@ -19,6 +19,9 @@ struct SettingsView: View {
                 TextField("Governance", text: $config.governanceAddress)
                     .textFieldStyle(.roundedBorder)
 
+                TextField("GSE", text: $config.gseAddress)
+                    .textFieldStyle(.roundedBorder)
+
                 TextField("Rollup", text: $config.rollupAddress)
                     .textFieldStyle(.roundedBorder)
             }
@@ -57,7 +60,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 450, height: 480)
+        .frame(width: 450, height: 520)
         .onChange(of: config) { _, _ in
             isSaved = false
         }

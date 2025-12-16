@@ -6,13 +6,19 @@ struct Governance {
 
     // Function selectors (first 4 bytes of keccak256 hash of function signature)
     private enum Selectors {
-        // Add selectors here as needed
-        // Example: static let getProposal = "0x..."
+        static let proposalCount = "0xda35c664"  // proposalCount()
+        static let totalPowerNow = "0x7f514e78"  // totalPowerNow()
     }
 
     // MARK: - Read Methods
 
-    // Add methods here as needed
-    // Example:
-    // func getProposal(id: UInt64) async throws -> Proposal { ... }
+    func getProposalCount() async throws -> UInt64 {
+        let result = try await client.call(to: address, data: Selectors.proposalCount)
+        return ABI.parseUint256(result)
+    }
+
+    func getTotalPowerNow() async throws -> Double {
+        let result = try await client.call(to: address, data: Selectors.totalPowerNow)
+        return ABI.parseUint256AsDouble(result, decimals: 18)
+    }
 }

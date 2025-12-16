@@ -4,12 +4,14 @@ struct MonitorService {
     let client: EthClient
     let governanceProposer: GovernanceProposer
     let governance: Governance
+    let gse: GSE
     let rollup: Rollup
 
     init(client: EthClient, config: Config) {
         self.client = client
         self.governanceProposer = GovernanceProposer(client: client, address: config.governanceProposerAddress)
         self.governance = Governance(client: client, address: config.governanceAddress)
+        self.gse = GSE(client: client, address: config.gseAddress)
         self.rollup = Rollup(client: client, address: config.rollupAddress)
     }
 
@@ -52,6 +54,12 @@ struct MonitorService {
             ))
         }
 
+        // Fetch governance data
+        let governanceData = try await fetchGovernanceData()
+
+        // Fetch GSE data
+        let gseData = try await fetchGSEData()
+
         return MonitorState(
             currentRound: currentRound,
             currentSlot: currentSlot,
@@ -61,7 +69,53 @@ struct MonitorService {
             fetchedAt: Date(),
             blockNumber: blockNumber,
             notifiedProposals: [],
-            notifiedQuorums: []
+            notifiedQuorums: [],
+            governanceData: governanceData,
+            gseData: gseData
+        )
+    }
+
+    private func fetchGovernanceData() async throws -> GovernanceData {
+        let proposalCount = try await governance.getProposalCount()
+        let totalPower = try await governance.getTotalPowerNow()
+
+        return GovernanceData(
+            proposalCount: proposalCount,
+            totalPower: totalPower
+        )
+    }
+
+    private func fetchGSEData() async throws -> GSEData {
+        let totalSupply = try await gse.getTotalSupply()
+        let bonusInstanceAddress = try await gse.getBonusInstanceAddress()
+        let latestRollup = try await gse.getLatestRollup()
+
+        let bonusSupply = try await gse.getSupplyOf(instance: bonusInstanceAddress)
+        let rollupSupply = try await gse.getSupplyOf(instance: rollup.address)
+
+        // Get current timestamp for attester count
+        let currentTimestamp = UInt64(Date().timeIntervalSince1970)
+
+        let bonusAttesterCount = try await gse.getAttesterCountAtTime(
+            instance: bonusInstanceAddress,
+            timestamp: currentTimestamp
+        )
+        let rollupAttesterCount = try await gse.getAttesterCountAtTime(
+            instance: rollup.address,
+            timestamp: currentTimestamp
+        )
+
+        // Check if configured rollup is the canonical (latest) rollup
+        let rollupIsCanonical = rollup.address.lowercased() == latestRollup.lowercased()
+
+        return GSEData(
+            totalSupply: totalSupply,
+            bonusInstanceAddress: bonusInstanceAddress,
+            bonusSupply: bonusSupply,
+            rollupSupplyRaw: rollupSupply,
+            bonusAttesterCount: bonusAttesterCount,
+            rollupAttesterCountRaw: rollupAttesterCount,
+            rollupIsCanonical: rollupIsCanonical
         )
     }
 }
