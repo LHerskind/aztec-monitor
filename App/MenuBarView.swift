@@ -17,7 +17,26 @@ struct MenuBarView: View {
 
             Divider()
 
-            // Section 1: Governance Proposer
+            // Section 1: Rollup | GSE & Governance
+            HStack(alignment: .top, spacing: 16) {
+                // Left column - Rollup
+                rollupSection
+                    .frame(width: 320)
+
+                Divider()
+
+                // Right column - GSE & Governance stacked
+                VStack(alignment: .leading, spacing: 12) {
+                    gseSection
+                    Divider()
+                    governanceSection
+                }
+                .frame(width: 300)
+            }
+
+            Divider()
+
+            // Section 2: Governance Proposer
             VStack(alignment: .leading, spacing: 8) {
                 Text("Governance Proposer")
                     .font(.subheadline)
@@ -39,30 +58,12 @@ struct MenuBarView: View {
 
             Divider()
 
-            // Section 2: Governance & GSE | Rollup
-            HStack(alignment: .top, spacing: 16) {
-                // Left column - Governance & GSE stacked
-                VStack(alignment: .leading, spacing: 12) {
-                    governanceSection
-                    Divider()
-                    gseSection
-                }
-                .frame(width: 320)
-
-                Divider()
-
-                // Right column - Rollup (placeholder for future)
-                rollupSection
-                    .frame(width: 300)
-            }
-
-            Divider()
-
             // Footer
             footerSection
         }
         .padding(16)
         .frame(width: 680)
+        .background(Color(NSColor.windowBackgroundColor))
         .onAppear {
             refreshState()
         }

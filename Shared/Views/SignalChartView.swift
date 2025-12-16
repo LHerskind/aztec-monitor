@@ -72,11 +72,6 @@ struct SignalChartView: View {
                 RuleMark(y: .value("Quorum", Int(quorumSize)))
                     .foregroundStyle(.secondary.opacity(0.7))
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
-                    .annotation(position: .trailing, alignment: .leading) {
-                        Text("Q")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
 
                 // Bars for each round
                 ForEach(chartData) { data in
