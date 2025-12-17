@@ -8,6 +8,7 @@ struct GSEData: Codable, Equatable {
     let bonusAttesterCount: UInt64
     let rollupAttesterCountRaw: UInt64  // Raw from contract (includes bonus when canonical)
     let rollupIsCanonical: Bool
+    let activationThreshold: Double
 
     // MARK: - Direct Values (excluding bonus)
     // Note: Contract behavior differs between supply and attesters:
@@ -104,5 +105,19 @@ struct GSEData: Codable, Equatable {
         } else {
             return String(format: "%.2f", value)
         }
+    }
+
+    // MARK: - APY
+
+    /// Estimated APY based on yearly rewards distributed across attesters
+    /// APY = (yearlyRewards / totalAttesters) / activationThreshold * 100
+    var estimatedAPY: Double {
+        guard rollupAttesterCountEffective > 0, activationThreshold > 0 else { return 0 }
+        let rewardsPerAttester = RollupData.yearlyRewardBudget / Double(rollupAttesterCountEffective)
+        return (rewardsPerAttester / activationThreshold) * 100
+    }
+
+    var formattedActivationThreshold: String {
+        formatLargeNumber(activationThreshold)
     }
 }

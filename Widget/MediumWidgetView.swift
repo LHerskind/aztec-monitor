@@ -5,128 +5,73 @@ struct MediumWidgetView: View {
     let entry: RoundEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Title
-            Text("Aztec Governance Proposer Monitor")
-                .font(.caption)
-                .foregroundColor(.secondary)
+        if let state = entry.state {
+            HStack(spacing: 12) {
+                // Left: Current round info
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Round \(state.currentRound)")
+                        .font(.headline)
+                        .fontWeight(.bold)
 
-            // Header
-            HStack {
-                Text("Round \(entry.state?.currentRound ?? 0)")
-                    .font(.headline)
-                    .fontWeight(.bold)
+                    Text("Slot \(state.formattedSlotProgress)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+
+                    if let round = state.currentRoundData {
+                        HStack(spacing: 4) {
+                            if round.hasProposal {
+                                Image(systemName: round.quorumReached ? "checkmark.circle.fill" : "clock")
+                                    .foregroundColor(round.quorumReached ? .green : .orange)
+                                Text("\(round.signalCount ?? 0)/\(state.quorumSize)")
+                                    .font(.caption)
+                            } else {
+                                Image(systemName: "doc.badge.clock")
+                                    .foregroundColor(.secondary)
+                                Text("No proposal")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                }
+
                 Spacer()
-                if let state = entry.state {
-                    Text("slot \(state.slotInRound)/\(state.roundSize)")
-                        .font(.subheadline)
+
+                // Right: Recent rounds summary
+                VStack(alignment: .trailing, spacing: 4) {
+                    let passedCount = state.pastRounds.filter { $0.executed || $0.quorumReached }.count
+                    let totalWithProposal = state.pastRounds.filter { $0.hasProposal }.count
+
+                    Text("\(passedCount)/\(totalWithProposal)")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(passedCount == totalWithProposal ? .green : .orange)
+
+                    Text("recent passed")
+                        .font(.caption2)
                         .foregroundColor(.secondary)
-                }
-            }
 
-            Spacer()
-
-            // Content
-            if let round = entry.currentRound {
-                if let payload = round.payload {
-                    // Proposal link
-                    if let url = entry.config.explorerURL(for: payload) {
-                        Link(destination: url) {
-                            HStack {
-                                Text("Proposal:")
-                                    .foregroundColor(.primary)
-                                Text(payload)
-                                    .lineLimit(1)
-                                    .truncationMode(.middle)
-                                    .foregroundColor(.blue)
-                                Image(systemName: "arrow.up.right.square")
-                                    .font(.caption)
-                                    .foregroundColor(.blue)
-                            }
-                            .font(.subheadline)
-                        }
-                    } else {
-                        HStack {
-                            Text("Proposal:")
-                            Text(payload)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                                .foregroundColor(.secondary)
-                        }
-                        .font(.subheadline)
-                    }
-
-                    // Progress bar
-                    if let signalCount = round.signalCount, let quorumSize = entry.state?.quorumSize {
-                        HStack {
-                            Text("Signals:")
-                                .font(.caption)
-                            GeometryReader { geometry in
-                                ZStack(alignment: .leading) {
-                                    RoundedRectangle(cornerRadius: 4)
-                                        .fill(Color.gray.opacity(0.3))
-                                        .frame(height: 8)
-
-                                    RoundedRectangle(cornerRadius: 4)
-                                        .fill(round.quorumReached ? Color.green : Color.blue)
-                                        .frame(
-                                            width: geometry.size.width * min(1.0, CGFloat(signalCount) / CGFloat(quorumSize)),
-                                            height: 8
-                                        )
-                                }
-                            }
-                            .frame(height: 8)
-
-                            Text("\(signalCount)/\(quorumSize)")
-                                .font(.caption)
-                                .foregroundColor(round.quorumReached ? .green : .secondary)
-
-                            if round.quorumReached {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                                    .font(.caption)
-                            }
-                        }
-                    }
-                } else {
-                    Text("No proposal yet")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-            } else {
-                Text("No data available")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-
-            Spacer()
-
-            // Footer
-            HStack {
-                Text("Updated: \(entry.state?.formattedFetchTime ?? "--:--")")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                if let blockNumber = entry.state?.formattedBlockNumber {
-                    Text("block \(blockNumber)")
+                    Text(state.formattedFetchTime)
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
             }
+            .padding()
+        } else {
+            VStack {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.largeTitle)
+                    .foregroundColor(.orange)
+                Text("No data available")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
         }
-        .padding()
     }
 }
 
-// WidgetKit preview
 #Preview(as: .systemMedium) {
     AztecWidget()
 } timeline: {
     RoundEntry.preview
-}
-
-// Simple SwiftUI preview
-#Preview("Medium Widget View") {
-    MediumWidgetView(entry: RoundEntry.preview)
-        .frame(width: 329, height: 155)
-        .background(.background)
 }

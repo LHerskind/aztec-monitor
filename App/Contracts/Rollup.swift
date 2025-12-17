@@ -15,6 +15,7 @@ struct Rollup {
         static let getEntryQueueLength = "0x1b56a0e7"    // getEntryQueueLength()
         static let getGenesisTime = "0x723d8e96"         // getGenesisTime()
         static let getSlotDuration = "0xc4014c12"        // getSlotDuration()
+        static let getActivationThreshold = "0xaa10df4c" // getActivationThreshold()
     }
 
     // MARK: - Read Methods
@@ -63,6 +64,11 @@ struct Rollup {
     func getSlotDuration() async throws -> UInt64 {
         let result = try await client.call(to: address, data: Selectors.getSlotDuration)
         return ABI.parseUint256(result)
+    }
+
+    func getActivationThreshold() async throws -> Double {
+        let result = try await client.call(to: address, data: Selectors.getActivationThreshold)
+        return ABI.parseUint256AsDouble(result, decimals: 18)
     }
 
     /// Parse slot number from block data (at byte offset 160)

@@ -5,135 +5,57 @@ struct LargeWidgetView: View {
     let entry: RoundEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // Title
-            Text("Aztec Governance Proposer Monitor")
-                .font(.caption)
-                .foregroundColor(.secondary)
-
-            // Header
-            HStack {
-                Text("Round \(entry.state?.currentRound ?? 0)")
-                    .font(.headline)
-                    .fontWeight(.bold)
-                Spacer()
-                if let state = entry.state {
-                    Text("slot \(state.slotInRound)/\(state.roundSize)")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-            }
-
-            // Current round details
-            if let round = entry.currentRound {
-                if let payload = round.payload {
-                    // Proposal
-                    if let url = entry.config.explorerURL(for: payload) {
-                        Link(destination: url) {
-                            HStack {
-                                Text("Proposal:")
-                                    .foregroundColor(.primary)
-                                Text(payload)
-                                    .lineLimit(1)
-                                    .truncationMode(.middle)
-                                    .foregroundColor(.blue)
-                                Image(systemName: "arrow.up.right.square")
-                                    .font(.caption)
-                                    .foregroundColor(.blue)
-                            }
-                            .font(.subheadline)
-                        }
-                    } else {
-                        HStack {
-                            Text("Proposal:")
-                            Text(payload)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                                .foregroundColor(.secondary)
-                        }
-                        .font(.subheadline)
-                    }
-
-                    // Progress bar
-                    if let signalCount = round.signalCount, let quorumSize = entry.state?.quorumSize {
-                        HStack {
-                            Text("Signals:")
-                                .font(.caption)
-                            GeometryReader { geometry in
-                                ZStack(alignment: .leading) {
-                                    RoundedRectangle(cornerRadius: 4)
-                                        .fill(Color.gray.opacity(0.3))
-                                        .frame(height: 8)
-
-                                    RoundedRectangle(cornerRadius: 4)
-                                        .fill(round.quorumReached ? Color.green : Color.blue)
-                                        .frame(
-                                            width: geometry.size.width * min(1.0, CGFloat(signalCount) / CGFloat(quorumSize)),
-                                            height: 8
-                                        )
-                                }
-                            }
-                            .frame(height: 8)
-
-                            Text("\(signalCount)/\(quorumSize)")
-                                .font(.caption)
-                                .foregroundColor(round.quorumReached ? .green : .secondary)
-
-                            if round.quorumReached {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                                    .font(.caption)
-                            }
-                        }
-                    }
-                } else {
-                    Text("No proposal yet")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
-            }
-
-            Divider()
-                .padding(.vertical, 2)
-
-            // Past rounds table (no links in widget)
-            if let state = entry.state {
-                RoundsTableView(
-                    rounds: state.pastRounds,
-                    currentRound: state.currentRound,
-                    config: nil  // No clickable links in widget
-                )
-            }
-
-            Spacer()
-
-            // Footer
-            HStack {
-                Text("Updated: \(entry.state?.formattedFetchTime ?? "--:--")")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                if let blockNumber = entry.state?.formattedBlockNumber {
+        if let state = entry.state {
+            VStack(alignment: .leading, spacing: 8) {
+                // Header
+                HStack {
+                    Text("Round \(state.currentRound)")
+                        .font(.headline)
+                        .fontWeight(.bold)
                     Spacer()
-                    Text("block \(blockNumber)")
+                    Text("Slot \(state.formattedSlotProgress)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Divider()
+
+                // Rounds table
+                RoundsTableView(
+                    rounds: state.lastRounds,
+                    currentRound: state.currentRound,
+                    config: nil
+                )
+
+                Spacer()
+
+                // Footer
+                HStack {
+                    Text("Updated \(state.formattedFetchTime)")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text("Block \(state.formattedBlockNumber)")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
             }
+            .padding()
+        } else {
+            VStack {
+                Image(systemName: "exclamationmark.triangle")
+                    .font(.largeTitle)
+                    .foregroundColor(.orange)
+                Text("No data available")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
         }
-        .padding()
     }
 }
 
-// WidgetKit preview
 #Preview(as: .systemLarge) {
     AztecWidget()
 } timeline: {
     RoundEntry.preview
-}
-
-// Simple SwiftUI preview
-#Preview("Large Widget View") {
-    LargeWidgetView(entry: RoundEntry.preview)
-        .frame(width: 329, height: 345)
-        .background(.background)
 }

@@ -66,6 +66,12 @@ struct MenuBarView: View {
         .background(Color(NSColor.windowBackgroundColor))
         .onAppear {
             refreshState()
+            BackgroundRefresh.shared.onRefreshComplete = { [self] in
+                refreshState()
+            }
+        }
+        .onDisappear {
+            BackgroundRefresh.shared.onRefreshComplete = nil
         }
     }
 
@@ -387,6 +393,38 @@ struct MenuBarView: View {
                             .fontWeight(.medium)
                     }
 
+                    if let gse = currentState?.gseData {
+                        HStack {
+                            Text("Inclusion Probability:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(String(format: "%.2f%%", rollup.committeeProbability(totalAttesters: gse.rollupAttesterCountEffective)))
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+
+                        HStack {
+                            Text("Estimated APY:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(String(format: "%.2f%%", gse.estimatedAPY))
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+                    }
+
+                    HStack {
+                        Text("Entry Queue:")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text("\(rollup.entryQueueLength)")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                    }
+
                     HStack {
                         Text("Block Reward:")
                             .font(.caption)
@@ -398,11 +436,11 @@ struct MenuBarView: View {
                     }
 
                     HStack {
-                        Text("Entry Queue:")
+                        Text("Total Rewards Paid (% of Y1 rewards):")
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Spacer()
-                        Text("\(rollup.entryQueueLength)")
+                        Text("\(rollup.formattedTotalRewardsPaid) (\(String(format: "%.2f", rollup.rewardsAsPercentageOfYearlyBudget))%)")
                             .font(.caption)
                             .fontWeight(.medium)
                     }

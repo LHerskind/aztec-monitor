@@ -6,6 +6,7 @@ final class BackgroundRefresh {
     static let shared = BackgroundRefresh()
 
     private var timer: Timer?
+    var onRefreshComplete: (() -> Void)?
 
     private init() {}
 
@@ -73,6 +74,7 @@ final class BackgroundRefresh {
             updatedState.save()
 
             print("Refresh completed: Round \(updatedState.currentRound), \(events.count) events")
+            onRefreshComplete?()
         } catch {
             print("Refresh failed: \(error)")
         }

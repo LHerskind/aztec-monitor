@@ -112,6 +112,8 @@ struct MonitorService {
         // Check if configured rollup is the canonical (latest) rollup
         let rollupIsCanonical = rollup.address.lowercased() == latestRollup.lowercased()
 
+        let activationThreshold = try await rollup.getActivationThreshold()
+
         return GSEData(
             totalSupply: totalSupply,
             bonusInstanceAddress: bonusInstanceAddress,
@@ -119,7 +121,8 @@ struct MonitorService {
             rollupSupplyRaw: rollupSupply,
             bonusAttesterCount: bonusAttesterCount,
             rollupAttesterCountRaw: rollupAttesterCount,
-            rollupIsCanonical: rollupIsCanonical
+            rollupIsCanonical: rollupIsCanonical,
+            activationThreshold: activationThreshold
         )
     }
 

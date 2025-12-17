@@ -37,7 +37,12 @@ struct MonitorState: Codable, Equatable {
             return
         }
         MonitorState.sharedDefaults.set(data, forKey: MonitorState.stateKey)
-        WidgetCenter.shared.reloadAllTimelines()
+        // Synchronize to ensure data is written before widget reload
+        MonitorState.sharedDefaults.synchronize()
+        // Reload each widget explicitly
+        WidgetCenter.shared.reloadTimelines(ofKind: "AztecWidget")
+        WidgetCenter.shared.reloadTimelines(ofKind: "SignalChartWidget")
+        WidgetCenter.shared.reloadTimelines(ofKind: "RollupWidget")
     }
 
     /// Slot progress within the current round (0 to roundSize-1)

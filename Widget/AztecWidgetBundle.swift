@@ -6,5 +6,6 @@ struct AztecWidgetBundle: WidgetBundle {
     var body: some Widget {
         AztecWidget()
         SignalChartWidget()
+        RollupWidget()
     }
 }

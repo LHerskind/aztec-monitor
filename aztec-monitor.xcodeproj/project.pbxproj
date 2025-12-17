@@ -599,7 +599,7 @@
 				DEVELOPMENT_TEAM = HYUKR8QQ3V;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Widget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = AztecWidget;
+				INFOPLIST_KEY_CFBundleDisplayName = "aztec-monitor";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -609,7 +609,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "spaztec.aztec-monitor.AztecWidget";
+				PRODUCT_BUNDLE_IDENTIFIER = "spaztec.aztec-monitor.AztecWidgetBundle";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
@@ -635,7 +635,7 @@
 				DEVELOPMENT_TEAM = HYUKR8QQ3V;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Widget/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = AztecWidget;
+				INFOPLIST_KEY_CFBundleDisplayName = "aztec-monitor";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -645,7 +645,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "spaztec.aztec-monitor.AztecWidget";
+				PRODUCT_BUNDLE_IDENTIFIER = "spaztec.aztec-monitor.AztecWidgetBundle";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;

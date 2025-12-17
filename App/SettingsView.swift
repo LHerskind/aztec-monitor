@@ -3,7 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @State private var config: Config = Config.load()
     @State private var isSaved = false
-    private let pollIntervalOptions = [5, 15, 30, 60, 120]
+    private let pollIntervalOptions = [1, 5, 15, 30, 60, 120]
 
     var body: some View {
         Form {
@@ -34,7 +34,7 @@ struct SettingsView: View {
             Section("Refresh") {
                 Picker("Poll Interval", selection: $config.pollIntervalMinutes) {
                     ForEach(pollIntervalOptions, id: \.self) { minutes in
-                        Text("\(minutes) minutes").tag(minutes)
+                        Text("\(minutes) \(minutes == 1 ? "minute" : "minutes")").tag(minutes)
                     }
                 }
             }

@@ -21,6 +21,25 @@ struct RollupData: Codable, Equatable {
             : 0
     }
 
+    /// Total rewards paid out (proven blocks * block reward)
+    var totalRewardsPaid: Double {
+        Double(provenBlockNumber) * blockReward
+    }
+
+    /// Yearly reward budget
+    static let yearlyRewardBudget: Double = 249_000_000
+
+    /// Total rewards as percentage of yearly budget
+    var rewardsAsPercentageOfYearlyBudget: Double {
+        (totalRewardsPaid / RollupData.yearlyRewardBudget) * 100
+    }
+
+    /// Probability of being included in the next committee (as percentage)
+    func committeeProbability(totalAttesters: UInt64) -> Double {
+        guard totalAttesters > 0 else { return 0 }
+        return (Double(targetCommitteeSize) / Double(totalAttesters)) * 100
+    }
+
     /// Calculate timestamp for a given slot
     func timestampForSlot(_ slot: UInt64) -> UInt64 {
         genesisTime + (slot * slotDuration)
@@ -76,6 +95,18 @@ struct RollupData: Codable, Equatable {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         return formatter.string(from: NSNumber(value: provenBlockNumber)) ?? String(provenBlockNumber)
+    }
+
+    var formattedTotalRewardsPaid: String {
+        if totalRewardsPaid >= 1_000_000 {
+            return String(format: "%.2fM", totalRewardsPaid / 1_000_000)
+        } else if totalRewardsPaid >= 1_000 {
+            return String(format: "%.2fK", totalRewardsPaid / 1_000)
+        } else if totalRewardsPaid >= 1 {
+            return String(format: "%.2f", totalRewardsPaid)
+        } else {
+            return String(format: "%.4f", totalRewardsPaid)
+        }
     }
 
     /// Number of blocks used in average calculation

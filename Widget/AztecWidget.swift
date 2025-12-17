@@ -1,22 +1,6 @@
 import SwiftUI
 import WidgetKit
 
-struct AztecWidgetEntryView: View {
-    @Environment(\.widgetFamily) var widgetFamily
-    var entry: RoundEntry
-
-    var body: some View {
-        switch widgetFamily {
-        case .systemMedium:
-            MediumWidgetView(entry: entry)
-        case .systemLarge:
-            LargeWidgetView(entry: entry)
-        default:
-            MediumWidgetView(entry: entry)
-        }
-    }
-}
-
 struct AztecWidget: Widget {
     let kind: String = "AztecWidget"
 
@@ -31,13 +15,21 @@ struct AztecWidget: Widget {
     }
 }
 
-#Preview(as: .systemMedium) {
-    AztecWidget()
-} timeline: {
-    RoundEntry.preview
+struct AztecWidgetEntryView: View {
+    @Environment(\.widgetFamily) var widgetFamily
+    var entry: RoundEntry
+
+    var body: some View {
+        switch widgetFamily {
+        case .systemLarge:
+            LargeWidgetView(entry: entry)
+        default:
+            MediumWidgetView(entry: entry)
+        }
+    }
 }
 
-#Preview(as: .systemLarge) {
+#Preview(as: .systemMedium) {
     AztecWidget()
 } timeline: {
     RoundEntry.preview
