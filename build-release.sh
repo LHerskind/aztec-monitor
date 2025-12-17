@@ -33,6 +33,10 @@ mkdir -p "$DIST_DIR"
 rm -rf "$DIST_DIR/$APP_NAME.app"
 cp -R "$BUILT_APP" "$DIST_DIR/"
 
+# Ad-hoc sign the app (allows right-click → Open to work reliably)
+echo "🔏 Signing app (ad-hoc)..."
+codesign --force --deep --sign - "$DIST_DIR/$APP_NAME.app"
+
 # Create zip for sharing
 cd "$DIST_DIR"
 rm -f "$APP_NAME.zip"
