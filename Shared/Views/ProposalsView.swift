@@ -148,34 +148,44 @@ struct ProposalRowView: View {
                     }
                     .font(.system(size: 8))
 
-                    HStack(spacing: 1) {
-                        PhaseSegment(
-                            width: geometry.size.width * CGFloat(pendingFrac),
-                            color: .orange,
-                            isActive: proposal.state == .pending,
-                            isPast: proposal.state != .pending
-                        )
-                        PhaseSegment(
-                            width: geometry.size.width * CGFloat(activeFrac),
-                            color: .blue,
-                            isActive: proposal.state == .active,
-                            isPast: [.queued, .executable, .executed, .rejected, .expired].contains(proposal.state)
-                        )
-                        PhaseSegment(
-                            width: geometry.size.width * CGFloat(queuedFrac),
-                            color: .purple,
-                            isActive: proposal.state == .queued,
-                            isPast: [.executable, .executed, .expired].contains(proposal.state)
-                        )
-                        PhaseSegment(
-                            width: geometry.size.width * CGFloat(execFrac),
-                            color: .green,
-                            isActive: proposal.state == .executable,
-                            isPast: proposal.state == .executed
-                        )
+                    ZStack(alignment: .leading) {
+                        HStack(spacing: 1) {
+                            PhaseSegment(
+                                width: geometry.size.width * CGFloat(pendingFrac),
+                                color: .orange,
+                                isActive: proposal.state == .pending,
+                                isPast: proposal.state != .pending
+                            )
+                            PhaseSegment(
+                                width: geometry.size.width * CGFloat(activeFrac),
+                                color: .blue,
+                                isActive: proposal.state == .active,
+                                isPast: [.queued, .executable, .executed, .rejected, .expired].contains(proposal.state)
+                            )
+                            PhaseSegment(
+                                width: geometry.size.width * CGFloat(queuedFrac),
+                                color: .purple,
+                                isActive: proposal.state == .queued,
+                                isPast: [.executable, .executed, .expired].contains(proposal.state)
+                            )
+                            PhaseSegment(
+                                width: geometry.size.width * CGFloat(execFrac),
+                                color: .green,
+                                isActive: proposal.state == .executable,
+                                isPast: proposal.state == .executed
+                            )
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: 3))
+
+                        if let nowPosition = nowPositionFraction() {
+                            Rectangle()
+                                .fill(Color.white)
+                                .frame(width: 2, height: 10)
+                                .shadow(color: .black.opacity(0.5), radius: 1, x: 0, y: 0)
+                                .offset(x: geometry.size.width * CGFloat(nowPosition) - 1)
+                        }
                     }
-                    .frame(height: 6)
-                    .clipShape(RoundedRectangle(cornerRadius: 3))
+                    .frame(height: 10)
 
                     HStack(spacing: 0) {
                         Text(formatShortDate(proposal.creation))
@@ -199,6 +209,20 @@ struct ProposalRowView: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d"
         return formatter.string(from: date)
+    }
+
+    private func nowPositionFraction() -> Double? {
+        let now = Date()
+        let start = proposal.creation
+        let end = proposal.executableThrough
+
+        guard now >= start && now <= end else { return nil }
+
+        let elapsed = now.timeIntervalSince(start)
+        let total = end.timeIntervalSince(start)
+
+        guard total > 0 else { return nil }
+        return elapsed / total
     }
 
     private var votesBar: some View {
