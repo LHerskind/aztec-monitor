@@ -2,6 +2,7 @@ import Foundation
 
 struct MonitorService {
     let client: EthClient
+    let config: Config
     let governanceProposer: GovernanceProposer
     let governance: Governance
     let gse: GSE
@@ -9,6 +10,7 @@ struct MonitorService {
 
     init(client: EthClient, config: Config) {
         self.client = client
+        self.config = config
         self.governanceProposer = GovernanceProposer(client: client, address: config.governanceProposerAddress)
         self.governance = Governance(client: client, address: config.governanceAddress)
         self.gse = GSE(client: client, address: config.gseAddress)
@@ -83,10 +85,43 @@ struct MonitorService {
         let proposalCount = try await governance.getProposalCount()
         let totalPower = try await governance.getTotalPowerNow()
 
+        let proposalsToFetch = determineProposalsToFetch(proposalCount: proposalCount)
+
+        var proposals: [ProposalData] = []
+        for proposalId in proposalsToFetch {
+            do {
+                var proposal = try await governance.getProposal(proposalId: proposalId)
+
+                proposal.originalPayload = try await governance.getPayloadOriginalPayload(
+                    payloadAddress: proposal.payloadAddress
+                )
+                proposal.uri = try await governance.getPayloadURI(
+                    payloadAddress: proposal.payloadAddress
+                )
+
+                proposals.append(proposal)
+            } catch {
+                continue
+            }
+        }
+
         return GovernanceData(
             proposalCount: proposalCount,
-            totalPower: totalPower
+            totalPower: totalPower,
+            proposals: proposals
         )
+    }
+
+    private func determineProposalsToFetch(proposalCount: UInt64) -> [UInt64] {
+        guard proposalCount > 0 else { return [] }
+
+        if !config.monitoredProposalIds.isEmpty {
+            return config.monitoredProposalIds.filter { $0 < proposalCount }
+        }
+
+        let maxToFetch = min(UInt64(config.maxProposalsToDisplay), proposalCount)
+        let startId = proposalCount - maxToFetch
+        return Array(startId..<proposalCount).reversed()
     }
 
     private func fetchGSEData() async throws -> GSEData {

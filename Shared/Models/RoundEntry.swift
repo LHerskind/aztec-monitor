@@ -99,7 +99,8 @@ struct RoundEntry: TimelineEntry {
             notifiedQuorums: [],
             governanceData: GovernanceData(
                 proposalCount: 0,
-                totalPower: 215_530_000
+                totalPower: 215_530_000,
+                proposals: []
             ),
             gseData: GSEData(
                 totalSupply: 215_530_000,

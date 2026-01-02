@@ -11,6 +11,8 @@ struct Config: Codable, Equatable {
     var pollIntervalMinutes: Int
     var notifyOnNewProposal: Bool
     var notifyOnQuorumReached: Bool
+    var monitoredProposalIds: [UInt64]
+    var maxProposalsToDisplay: Int
 
     // MARK: - Shared Storage via App Group UserDefaults
 
@@ -45,7 +47,9 @@ struct Config: Codable, Equatable {
         explorerBaseURL: "https://etherscan.io/address/",
         pollIntervalMinutes: 60,
         notifyOnNewProposal: true,
-        notifyOnQuorumReached: true
+        notifyOnQuorumReached: true,
+        monitoredProposalIds: [],
+        maxProposalsToDisplay: 5
     )
 
     var isValid: Bool {

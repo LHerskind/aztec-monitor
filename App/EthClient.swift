@@ -98,8 +98,85 @@ enum ABI {
         let startIndex = cleaned.index(cleaned.startIndex, offsetBy: charOffset)
         let endIndex = cleaned.index(startIndex, offsetBy: 64)
         let slice = String(cleaned[startIndex..<endIndex])
-        // Bool is non-zero value
         return slice.contains { $0 != "0" }
+    }
+
+    static func parseUint256(_ hex: String, byteOffset: Int) -> UInt64 {
+        let cleaned = hex.hasPrefix("0x") ? String(hex.dropFirst(2)) : hex
+        let charOffset = byteOffset * 2
+        guard cleaned.count >= charOffset + 64 else { return 0 }
+
+        let startIndex = cleaned.index(cleaned.startIndex, offsetBy: charOffset)
+        let endIndex = cleaned.index(startIndex, offsetBy: 64)
+        let slice = String(cleaned[startIndex..<endIndex])
+
+        let truncated = slice.count > 16 ? String(slice.suffix(16)) : slice
+        return UInt64(truncated, radix: 16) ?? 0
+    }
+
+    static func parseUint256AsDouble(_ hex: String, byteOffset: Int, decimals: Int = 18) -> Double {
+        let cleaned = hex.hasPrefix("0x") ? String(hex.dropFirst(2)) : hex
+        let charOffset = byteOffset * 2
+        guard cleaned.count >= charOffset + 64 else { return 0 }
+
+        let startIndex = cleaned.index(cleaned.startIndex, offsetBy: charOffset)
+        let endIndex = cleaned.index(startIndex, offsetBy: 64)
+        let hexSlice = String(cleaned[startIndex..<endIndex])
+
+        guard let value = parseHexToDouble(hexSlice) else { return 0 }
+        let divisor = pow(10.0, Double(decimals))
+        return value / divisor
+    }
+
+    static func parseUint8(_ hex: String, byteOffset: Int) -> UInt8 {
+        let cleaned = hex.hasPrefix("0x") ? String(hex.dropFirst(2)) : hex
+        let charOffset = byteOffset * 2
+        guard cleaned.count >= charOffset + 64 else { return 0 }
+
+        let startIndex = cleaned.index(cleaned.startIndex, offsetBy: charOffset)
+        let endIndex = cleaned.index(startIndex, offsetBy: 64)
+        let slice = String(cleaned[startIndex..<endIndex])
+
+        let truncated = slice.count > 2 ? String(slice.suffix(2)) : slice
+        return UInt8(truncated, radix: 16) ?? 0
+    }
+
+    static func parseTimestamp(_ hex: String, byteOffset: Int) -> Date {
+        let timestamp = parseUint256(hex, byteOffset: byteOffset)
+        return Date(timeIntervalSince1970: TimeInterval(timestamp))
+    }
+
+    static func parseString(_ hex: String) -> String? {
+        let cleaned = hex.hasPrefix("0x") ? String(hex.dropFirst(2)) : hex
+        guard cleaned.count >= 128 else { return nil }
+
+        let offset = parseUint256(cleaned, byteOffset: 0)
+        let lengthOffset = Int(offset)
+        let length = parseUint256(cleaned, byteOffset: lengthOffset)
+
+        guard length > 0, length < 10000 else { return nil }
+
+        let dataOffset = lengthOffset + 32
+        let dataCharOffset = dataOffset * 2
+        let dataLength = Int(length) * 2
+
+        guard cleaned.count >= dataCharOffset + dataLength else { return nil }
+
+        let startIndex = cleaned.index(cleaned.startIndex, offsetBy: dataCharOffset)
+        let endIndex = cleaned.index(startIndex, offsetBy: dataLength)
+        let hexData = String(cleaned[startIndex..<endIndex])
+
+        var bytes: [UInt8] = []
+        var i = hexData.startIndex
+        while i < hexData.endIndex {
+            let nextIndex = hexData.index(i, offsetBy: 2, limitedBy: hexData.endIndex) ?? hexData.endIndex
+            if let byte = UInt8(hexData[i..<nextIndex], radix: 16) {
+                bytes.append(byte)
+            }
+            i = nextIndex
+        }
+
+        return String(bytes: bytes, encoding: .utf8)
     }
 }
 

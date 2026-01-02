@@ -17,22 +17,13 @@ struct MenuBarView: View {
 
             Divider()
 
-            // Section 1: Rollup | GSE & Governance
-            HStack(alignment: .top, spacing: 16) {
-                // Left column - Rollup
-                rollupSection
-                    .frame(width: 320)
+            // Section 1: Rollup (two columns)
+            rollupSection
 
-                Divider()
+            Divider()
 
-                // Right column - GSE & Governance stacked
-                VStack(alignment: .leading, spacing: 12) {
-                    gseSection
-                    Divider()
-                    governanceSection
-                }
-                .frame(width: 300)
-            }
+            // Section 2: GSE
+            gseSection
 
             Divider()
 
@@ -56,9 +47,42 @@ struct MenuBarView: View {
                 }
             }
 
+            if let governanceData = currentState?.governanceData {
+                Divider()
+
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Governance")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.secondary)
+
+                        Spacer()
+
+                        Text("\(governanceData.proposalCount) proposals")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+
+                        Text("·")
+                            .foregroundColor(.secondary)
+
+                        Text(governanceData.formattedTotalPower + " voting power")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    if !governanceData.proposals.isEmpty {
+                        ProposalsView(
+                            proposals: governanceData.proposals,
+                            totalPower: governanceData.totalPower,
+                            config: config
+                        )
+                    }
+                }
+            }
+
             Divider()
 
-            // Footer
             footerSection
         }
         .padding(16)
@@ -146,46 +170,6 @@ struct MenuBarView: View {
         }
     }
 
-    // MARK: - Governance Section
-
-    @ViewBuilder
-    private var governanceSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Governance")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(.secondary)
-
-            if let governance = currentState?.governanceData {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text("Proposals:")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text("\(governance.proposalCount)")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-
-                    HStack {
-                        Text("Total Power:")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text(governance.formattedTotalPower)
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-                }
-            } else {
-                Text("No data")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-        }
-    }
-
     // MARK: - GSE Section
 
     @ViewBuilder
@@ -197,9 +181,8 @@ struct MenuBarView: View {
                 .foregroundColor(.secondary)
 
             if let gse = currentState?.gseData {
-                // Header row
                 HStack {
-                    Text("")
+                    Text("Latest Rollup")
                         .frame(width: 100, alignment: .leading)
                     Spacer()
                     Text("Supply")
@@ -210,27 +193,6 @@ struct MenuBarView: View {
                 .font(.caption2)
                 .foregroundColor(.secondary)
 
-                // Total row
-                HStack {
-                    Text("Total")
-                        .frame(width: 100, alignment: .leading)
-                    Spacer()
-                    Text(gse.formattedTotalSupply)
-                        .frame(width: 60, alignment: .trailing)
-                    Text("\(gse.totalAttesterCount)")
-                        .frame(width: 55, alignment: .trailing)
-                }
-                .font(.caption)
-                .fontWeight(.medium)
-
-                Divider()
-
-                // Latest Rollup section
-                Text("Latest Rollup")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-
-                // Direct row
                 HStack {
                     HStack(spacing: 4) {
                         RoundedRectangle(cornerRadius: 2)
@@ -248,7 +210,6 @@ struct MenuBarView: View {
                 .font(.caption2)
                 .foregroundColor(.blue)
 
-                // Bonus row (follows canonical)
                 HStack {
                     HStack(spacing: 4) {
                         RoundedRectangle(cornerRadius: 2)
@@ -266,7 +227,6 @@ struct MenuBarView: View {
                 .font(.caption2)
                 .foregroundColor(.purple)
 
-                // Effective row
                 HStack {
                     Text("= Effective")
                         .frame(width: 100, alignment: .leading)
@@ -279,7 +239,6 @@ struct MenuBarView: View {
                 .font(.caption)
                 .fontWeight(.medium)
 
-                // Stacked bar showing composition
                 StackedBar(
                     values: [
                         (gse.rollupSupplyDirect, Color.blue),
@@ -287,6 +246,20 @@ struct MenuBarView: View {
                     ],
                     total: gse.totalSupply
                 )
+
+                Divider()
+
+                HStack {
+                    Text("Total")
+                        .frame(width: 100, alignment: .leading)
+                    Spacer()
+                    Text(gse.formattedTotalSupply)
+                        .frame(width: 60, alignment: .trailing)
+                    Text("\(gse.totalAttesterCount)")
+                        .frame(width: 55, alignment: .trailing)
+                }
+                .font(.caption)
+                .fontWeight(.medium)
             } else {
                 Text("No data")
                     .font(.caption)
@@ -306,144 +279,144 @@ struct MenuBarView: View {
                 .foregroundColor(.secondary)
 
             if let rollup = currentState?.rollupData {
-                // Block numbers
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text("Pending Block:")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text(rollup.formattedPendingBlockNumber)
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-
-                    HStack {
-                        Text("Proven Block:")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text(rollup.formattedProvenBlockNumber)
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-
-                    if rollup.unprovenBlocks > 0 {
+                HStack(alignment: .top, spacing: 16) {
+                    // Left column - Block info and timing
+                    VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            Text("Unproven:")
+                            Text("Pending Block:")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             Spacer()
-                            Text("\(rollup.unprovenBlocks)")
-                                .font(.caption)
-                                .fontWeight(.medium)
-                                .foregroundColor(.orange)
-                        }
-                    }
-                }
-
-                Divider()
-
-                // Block timing
-                VStack(alignment: .leading, spacing: 4) {
-                    if let avgTime = rollup.formattedAverageBlockTime {
-                        HStack {
-                            Text("Avg Block Time (last \(rollup.blocksInAverage)):")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Spacer()
-                            Text(avgTime)
-                                .font(.caption)
-                                .fontWeight(.medium)
-                        }
-                    }
-
-                    if let lastBlock = rollup.formattedTimeSinceLastBlock {
-                        HStack {
-                            Text("Last Block:")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Spacer()
-                            Text(lastBlock)
-                                .font(.caption)
-                                .fontWeight(.medium)
-                        }
-                    }
-
-                    // Slot strip visualization
-                    if !rollup.recentBlockSlots.isEmpty, let state = currentState {
-                        SlotStripView(
-                            blockSlots: rollup.recentBlockSlots,
-                            currentSlot: state.currentSlot
-                        )
-                    }
-                }
-
-                Divider()
-
-                // Committee and rewards
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text("Committee Size:")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text("\(rollup.targetCommitteeSize)")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-
-                    if let gse = currentState?.gseData {
-                        HStack {
-                            Text("Inclusion Probability:")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Spacer()
-                            Text(String(format: "%.2f%%", rollup.committeeProbability(totalAttesters: gse.rollupAttesterCountEffective)))
+                            Text(rollup.formattedPendingBlockNumber)
                                 .font(.caption)
                                 .fontWeight(.medium)
                         }
 
                         HStack {
-                            Text("Estimated APY:")
+                            Text("Proven Block:")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             Spacer()
-                            Text(String(format: "%.2f%%", gse.estimatedAPY))
+                            Text(rollup.formattedProvenBlockNumber)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+
+                        if rollup.unprovenBlocks > 0 {
+                            HStack {
+                                Text("Unproven:")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text("\(rollup.unprovenBlocks)")
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.orange)
+                            }
+                        }
+
+                        Divider()
+
+                        if let avgTime = rollup.formattedAverageBlockTime {
+                            HStack {
+                                Text("Avg Block Time (last \(rollup.blocksInAverage)):")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text(avgTime)
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                            }
+                        }
+
+                        if let lastBlock = rollup.formattedTimeSinceLastBlock {
+                            HStack {
+                                Text("Last Block:")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text(lastBlock)
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                            }
+                        }
+
+                        if !rollup.recentBlockSlots.isEmpty, let state = currentState {
+                            SlotStripView(
+                                blockSlots: rollup.recentBlockSlots,
+                                currentSlot: state.currentSlot
+                            )
+                        }
+                    }
+                    .frame(width: 300)
+
+                    Divider()
+
+                    // Right column - Committee and rewards
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text("Committee Size:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("\(rollup.targetCommitteeSize)")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+
+                        if let gse = currentState?.gseData {
+                            HStack {
+                                Text("Inclusion Probability:")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text(String(format: "%.2f%%", rollup.committeeProbability(totalAttesters: gse.rollupAttesterCountEffective)))
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                            }
+
+                            HStack {
+                                Text("Estimated APY:")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                                Text(String(format: "%.2f%%", gse.estimatedAPY))
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                            }
+                        }
+
+                        HStack {
+                            Text("Entry Queue:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("\(rollup.entryQueueLength)")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+
+                        HStack {
+                            Text("Block Reward:")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(rollup.formattedBlockReward)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                        }
+
+                        HStack {
+                            Text("Total Rewards Paid (% of Y1):")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text("\(rollup.formattedTotalRewardsPaid) (\(String(format: "%.2f", rollup.rewardsAsPercentageOfYearlyBudget))%)")
                                 .font(.caption)
                                 .fontWeight(.medium)
                         }
                     }
-
-                    HStack {
-                        Text("Entry Queue:")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text("\(rollup.entryQueueLength)")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-
-                    HStack {
-                        Text("Block Reward:")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text(rollup.formattedBlockReward)
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
-
-                    HStack {
-                        Text("Total Rewards Paid (% of Y1 rewards):")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text("\(rollup.formattedTotalRewardsPaid) (\(String(format: "%.2f", rollup.rewardsAsPercentageOfYearlyBudget))%)")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                    }
+                    .frame(width: 300)
                 }
             } else {
                 Text("No data")
