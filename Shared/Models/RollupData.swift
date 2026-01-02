@@ -6,11 +6,12 @@ struct RollupData: Codable, Equatable {
     let targetCommitteeSize: UInt64
     let blockReward: Double
     let entryQueueLength: UInt64
+    let epochDuration: UInt64
+    let entryQueueFlushSize: UInt64
 
-    // Timing data
     let genesisTime: UInt64
     let slotDuration: UInt64
-    let recentBlockSlots: [UInt64]  // Slots of recent blocks (newest first)
+    let recentBlockSlots: [UInt64]
     let fetchedAt: Date
 
     // MARK: - Computed Properties
@@ -19,6 +20,34 @@ struct RollupData: Codable, Equatable {
         pendingBlockNumber > provenBlockNumber
             ? pendingBlockNumber - provenBlockNumber
             : 0
+    }
+
+    var epochDurationSeconds: UInt64 {
+        epochDuration * slotDuration
+    }
+
+    var queueWaitTimeSeconds: Double? {
+        guard entryQueueFlushSize > 0 else { return nil }
+        let epochsToWait = ceil(Double(entryQueueLength) / Double(entryQueueFlushSize))
+        return epochsToWait * Double(epochDurationSeconds)
+    }
+
+    var formattedQueueWaitTime: String? {
+        guard let waitSeconds = queueWaitTimeSeconds else { return nil }
+        if waitSeconds <= 0 {
+            return "No wait"
+        } else if waitSeconds >= 86400 {
+            let days = waitSeconds / 86400
+            return String(format: "~%.1f days", days)
+        } else if waitSeconds >= 3600 {
+            let hours = waitSeconds / 3600
+            return String(format: "~%.1f hours", hours)
+        } else if waitSeconds >= 60 {
+            let minutes = waitSeconds / 60
+            return String(format: "~%.0f min", minutes)
+        } else {
+            return "< 1 min"
+        }
     }
 
     /// Total rewards paid out (proven blocks * block reward)

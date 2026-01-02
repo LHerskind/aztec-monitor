@@ -391,9 +391,15 @@ struct MenuBarView: View {
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             Spacer()
-                            Text("\(rollup.entryQueueLength)")
-                                .font(.caption)
-                                .fontWeight(.medium)
+                            if let waitTime = rollup.formattedQueueWaitTime {
+                                Text("\(rollup.entryQueueLength) (\(waitTime))")
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                            } else {
+                                Text("\(rollup.entryQueueLength)")
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                            }
                         }
 
                         HStack {

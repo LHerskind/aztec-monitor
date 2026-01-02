@@ -167,10 +167,11 @@ struct MonitorService {
         let targetCommitteeSize = try await rollup.getTargetCommitteeSize()
         let blockReward = try await rollup.getBlockReward()
         let entryQueueLength = try await rollup.getEntryQueueLength()
+        let epochDuration = try await rollup.getEpochDuration()
+        let entryQueueFlushSize = try await rollup.getEntryQueueFlushSize()
         let genesisTime = try await rollup.getGenesisTime()
         let slotDuration = try await rollup.getSlotDuration()
 
-        // Fetch recent blocks to calculate average block time
         var recentBlockSlots: [UInt64] = []
         let blocksToFetch = min(16, pendingBlockNumber)
 
@@ -184,7 +185,6 @@ struct MonitorService {
                     recentBlockSlots.append(slot)
                 }
             } catch {
-                // Skip blocks that fail to fetch
                 continue
             }
         }
@@ -195,6 +195,8 @@ struct MonitorService {
             targetCommitteeSize: targetCommitteeSize,
             blockReward: blockReward,
             entryQueueLength: entryQueueLength,
+            epochDuration: epochDuration,
+            entryQueueFlushSize: entryQueueFlushSize,
             genesisTime: genesisTime,
             slotDuration: slotDuration,
             recentBlockSlots: recentBlockSlots,

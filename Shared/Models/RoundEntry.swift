@@ -118,6 +118,8 @@ struct RoundEntry: TimelineEntry {
                 targetCommitteeSize: 48,
                 blockReward: 0.1,
                 entryQueueLength: 5,
+                epochDuration: 32,
+                entryQueueFlushSize: 4,
                 genesisTime: 1700000000,
                 slotDuration: 12,
                 recentBlockSlots: [40700, 40699, 40698, 40697, 40696, 40695, 40694, 40693, 40692, 40691, 40690, 40689, 40688, 40687, 40686, 40685],

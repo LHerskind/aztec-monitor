@@ -6,16 +6,18 @@ struct Rollup {
 
     // Function selectors (first 4 bytes of keccak256 hash of function signature)
     private enum Selectors {
-        static let getCurrentSlot = "0xd8e3784c"         // getCurrentSlot()
-        static let getPendingBlockNumber = "0x48b9e57b"  // getPendingBlockNumber()
-        static let getProvenBlockNumber = "0xb67d057b"   // getProvenBlockNumber()
-        static let getTargetCommitteeSize = "0x7de3ca89" // getTargetCommitteeSize()
-        static let getBlockReward = "0xf89d4086"         // getBlockReward()
-        static let getBlock = "0x04c07569"               // getBlock(uint256)
-        static let getEntryQueueLength = "0x1b56a0e7"    // getEntryQueueLength()
-        static let getGenesisTime = "0x723d8e96"         // getGenesisTime()
-        static let getSlotDuration = "0xc4014c12"        // getSlotDuration()
-        static let getActivationThreshold = "0xaa10df4c" // getActivationThreshold()
+        static let getCurrentSlot = "0xd8e3784c"
+        static let getPendingBlockNumber = "0x48b9e57b"
+        static let getProvenBlockNumber = "0xb67d057b"
+        static let getTargetCommitteeSize = "0x7de3ca89"
+        static let getBlockReward = "0xf89d4086"
+        static let getBlock = "0x04c07569"
+        static let getEntryQueueLength = "0x1b56a0e7"
+        static let getGenesisTime = "0x723d8e96"
+        static let getSlotDuration = "0xc4014c12"
+        static let getActivationThreshold = "0xaa10df4c"
+        static let getEpochDuration = "0x5d3ea8f1"
+        static let getEntryQueueFlushSize = "0x10073ff0"
     }
 
     // MARK: - Read Methods
@@ -69,6 +71,16 @@ struct Rollup {
     func getActivationThreshold() async throws -> Double {
         let result = try await client.call(to: address, data: Selectors.getActivationThreshold)
         return ABI.parseUint256AsDouble(result, decimals: 18)
+    }
+
+    func getEpochDuration() async throws -> UInt64 {
+        let result = try await client.call(to: address, data: Selectors.getEpochDuration)
+        return ABI.parseUint256(result)
+    }
+
+    func getEntryQueueFlushSize() async throws -> UInt64 {
+        let result = try await client.call(to: address, data: Selectors.getEntryQueueFlushSize)
+        return ABI.parseUint256(result)
     }
 
     /// Parse slot number from block data (at byte offset 160)
