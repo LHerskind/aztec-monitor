@@ -570,7 +570,7 @@ struct MenuBarView: View {
         isRefreshing = true
 
         do {
-            let ethClient = try EthClient(rpcEndpoint: config.rpcEndpoint)
+            let ethClient = try EthClient(rpcEndpoint: config.rpcEndpoint, rateLimitEnabled: config.shouldRateLimit, requestsPerSecond: config.effectiveRequestsPerSecond)
             let monitorService = MonitorService(client: ethClient, config: config)
             var newState = try await monitorService.fetchCurrentState()
 

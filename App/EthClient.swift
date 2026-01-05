@@ -3,7 +3,8 @@ import Foundation
 enum EthError: Error, LocalizedError {
     case invalidURL
     case rpcError(String)
-    case invalidResponse
+    case invalidResponse(String)
+    case httpError(statusCode: Int, body: String?)
     case networkError(Error)
     case decodingError(String)
 
@@ -13,8 +14,24 @@ enum EthError: Error, LocalizedError {
             return "Invalid RPC URL"
         case .rpcError(let message):
             return "RPC Error: \(message)"
-        case .invalidResponse:
-            return "Invalid response from RPC"
+        case .invalidResponse(let details):
+            return "Invalid response from RPC: \(details)"
+        case .httpError(let statusCode, let body):
+            var message = "HTTP \(statusCode)"
+            if statusCode == 429 {
+                message += " (Rate Limited)"
+            } else if statusCode == 403 {
+                message += " (Forbidden)"
+            } else if statusCode == 401 {
+                message += " (Unauthorized)"
+            } else if statusCode >= 500 {
+                message += " (Server Error)"
+            }
+            if let body = body, !body.isEmpty {
+                let truncated = body.count > 200 ? String(body.prefix(200)) + "..." : body
+                message += " - \(truncated)"
+            }
+            return message
         case .networkError(let error):
             return "Network error: \(error.localizedDescription)"
         case .decodingError(let message):
@@ -183,16 +200,34 @@ enum ABI {
 actor EthClient {
     private let rpcEndpoint: URL
     private let session: URLSession
-
-    init(rpcEndpoint: String) throws {
+    private var lastRequestTime: Date = .distantPast
+    private let rateLimitEnabled: Bool
+    private let minRequestInterval: TimeInterval
+    
+    init(rpcEndpoint: String, rateLimitEnabled: Bool = false, requestsPerSecond: Int = 5) throws {
         guard let url = URL(string: rpcEndpoint) else {
             throw EthError.invalidURL
         }
         self.rpcEndpoint = url
         self.session = URLSession.shared
+        self.rateLimitEnabled = rateLimitEnabled
+        self.minRequestInterval = 1.0 / Double(max(1, requestsPerSecond))
+    }
+    
+    private func throttle() async {
+        guard rateLimitEnabled else { return }
+        
+        let elapsed = Date().timeIntervalSince(lastRequestTime)
+        if elapsed < minRequestInterval {
+            let delay = minRequestInterval - elapsed
+            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+        }
+        lastRequestTime = Date()
     }
 
     private func jsonRPC(method: String, params: [Any]) async throws -> Any {
+        await throttle()
+        
         var request = URLRequest(url: rpcEndpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -205,19 +240,27 @@ actor EthClient {
         ]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-        let (data, _) = try await session.data(for: request)
+        let (data, response) = try await session.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+            let bodyString = String(data: data, encoding: .utf8)
+            throw EthError.httpError(statusCode: httpResponse.statusCode, body: bodyString)
+        }
 
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw EthError.invalidResponse
+            let bodyPreview = String(data: data, encoding: .utf8) ?? "non-UTF8 data"
+            throw EthError.invalidResponse("Failed to parse JSON. Response: \(bodyPreview.prefix(200))")
         }
 
         if let error = json["error"] as? [String: Any] {
             let message = error["message"] as? String ?? "Unknown error"
-            throw EthError.rpcError(message)
+            let code = error["code"] as? Int
+            let fullMessage = code != nil ? "[\(code!)] \(message)" : message
+            throw EthError.rpcError(fullMessage)
         }
 
         guard let result = json["result"] else {
-            throw EthError.invalidResponse
+            throw EthError.invalidResponse("Missing 'result' field in response. Keys: \(json.keys.joined(separator: ", "))")
         }
 
         return result
@@ -228,7 +271,7 @@ actor EthClient {
         let params: [Any] = [callObject, "latest"]
         let result = try await jsonRPC(method: "eth_call", params: params)
         guard let hexString = result as? String else {
-            throw EthError.invalidResponse
+            throw EthError.invalidResponse("Expected hex string from eth_call, got \(type(of: result))")
         }
         return hexString
     }
@@ -236,7 +279,7 @@ actor EthClient {
     func getBlockNumber() async throws -> UInt64 {
         let result = try await jsonRPC(method: "eth_blockNumber", params: [])
         guard let hexString = result as? String else {
-            throw EthError.invalidResponse
+            throw EthError.invalidResponse("Expected hex string from eth_blockNumber, got \(type(of: result))")
         }
         return parseHexUInt64(hexString)
     }

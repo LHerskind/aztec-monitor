@@ -71,19 +71,27 @@ actor TestableEthClient {
         ]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-        let (data, _) = try await session.data(for: request)
+        let (data, response) = try await session.data(for: request)
+        
+        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+            let bodyString = String(data: data, encoding: .utf8)
+            throw EthError.httpError(statusCode: httpResponse.statusCode, body: bodyString)
+        }
 
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw EthError.invalidResponse
+            let bodyPreview = String(data: data, encoding: .utf8) ?? "non-UTF8 data"
+            throw EthError.invalidResponse("Failed to parse JSON. Response: \(bodyPreview.prefix(200))")
         }
 
         if let error = json["error"] as? [String: Any] {
             let message = error["message"] as? String ?? "Unknown error"
-            throw EthError.rpcError(message)
+            let code = error["code"] as? Int
+            let fullMessage = code != nil ? "[\(code!)] \(message)" : message
+            throw EthError.rpcError(fullMessage)
         }
 
         guard let result = json["result"] else {
-            throw EthError.invalidResponse
+            throw EthError.invalidResponse("Missing 'result' field in response. Keys: \(json.keys.joined(separator: ", "))")
         }
 
         return result
@@ -94,7 +102,7 @@ actor TestableEthClient {
         let params: [Any] = [callObject, "latest"]
         let result = try await jsonRPC(method: "eth_call", params: params)
         guard let hexString = result as? String else {
-            throw EthError.invalidResponse
+            throw EthError.invalidResponse("Expected hex string from eth_call, got \(type(of: result))")
         }
         return hexString
     }
@@ -102,7 +110,7 @@ actor TestableEthClient {
     func getBlockNumber() async throws -> UInt64 {
         let result = try await jsonRPC(method: "eth_blockNumber", params: [])
         guard let hexString = result as? String else {
-            throw EthError.invalidResponse
+            throw EthError.invalidResponse("Expected hex string from eth_blockNumber, got \(type(of: result))")
         }
         let cleaned = hexString.hasPrefix("0x") ? String(hexString.dropFirst(2)) : hexString
         return UInt64(cleaned, radix: 16) ?? 0
@@ -254,7 +262,7 @@ final class EthClientTests: XCTestCase {
             XCTFail("Should have thrown an error")
         } catch let error as EthError {
             if case .rpcError(let message) = error {
-                XCTAssertEqual(message, "execution reverted")
+                XCTAssertEqual(message, "[-32000] execution reverted")
             } else {
                 XCTFail("Expected rpcError")
             }
@@ -272,10 +280,63 @@ final class EthClientTests: XCTestCase {
             _ = try await client.call(to: "0x123", data: "0x456")
             XCTFail("Should have thrown an error")
         } catch let error as EthError {
-            if case .invalidResponse = error {
-                // Expected
+            if case .invalidResponse(let details) = error {
+                XCTAssertTrue(details.contains("result"), "Details should mention missing result field")
             } else {
                 XCTFail("Expected invalidResponse")
+            }
+        }
+    }
+
+    func testCall_handlesRateLimiting() async throws {
+        MockURLProtocol.mockHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 429,
+                httpVersion: nil,
+                headerFields: ["Content-Type": "application/json"]
+            )!
+            return ("Rate limit exceeded".data(using: .utf8)!, response)
+        }
+
+        let client = try TestableEthClient(rpcEndpoint: "http://localhost:8545", session: session)
+
+        do {
+            _ = try await client.call(to: "0x123", data: "0x456")
+            XCTFail("Should have thrown an error")
+        } catch let error as EthError {
+            if case .httpError(let statusCode, let body) = error {
+                XCTAssertEqual(statusCode, 429)
+                XCTAssertEqual(body, "Rate limit exceeded")
+                XCTAssertTrue(error.localizedDescription.contains("Rate Limited"))
+            } else {
+                XCTFail("Expected httpError, got \(error)")
+            }
+        }
+    }
+
+    func testCall_handlesServerError() async throws {
+        MockURLProtocol.mockHandler = { request in
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 503,
+                httpVersion: nil,
+                headerFields: ["Content-Type": "application/json"]
+            )!
+            return ("Service unavailable".data(using: .utf8)!, response)
+        }
+
+        let client = try TestableEthClient(rpcEndpoint: "http://localhost:8545", session: session)
+
+        do {
+            _ = try await client.call(to: "0x123", data: "0x456")
+            XCTFail("Should have thrown an error")
+        } catch let error as EthError {
+            if case .httpError(let statusCode, _) = error {
+                XCTAssertEqual(statusCode, 503)
+                XCTAssertTrue(error.localizedDescription.contains("Server Error"))
+            } else {
+                XCTFail("Expected httpError, got \(error)")
             }
         }
     }

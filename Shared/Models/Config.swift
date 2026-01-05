@@ -13,6 +13,8 @@ struct Config: Codable, Equatable {
     var notifyOnQuorumReached: Bool
     var monitoredProposalIds: [UInt64]
     var maxProposalsToDisplay: Int
+    var enableRateLimiting: Bool?
+    var requestsPerSecond: Int?
 
     // MARK: - Shared Storage via App Group UserDefaults
 
@@ -49,8 +51,21 @@ struct Config: Codable, Equatable {
         notifyOnNewProposal: true,
         notifyOnQuorumReached: true,
         monitoredProposalIds: [],
-        maxProposalsToDisplay: 5
+        maxProposalsToDisplay: 5,
+        enableRateLimiting: nil,
+        requestsPerSecond: nil
     )
+    
+    var effectiveRequestsPerSecond: Int {
+        requestsPerSecond ?? 5
+    }
+    
+    var shouldRateLimit: Bool {
+        if let explicit = enableRateLimiting {
+            return explicit
+        }
+        return !rpcEndpoint.contains("localhost") && !rpcEndpoint.contains("127.0.0.1")
+    }
 
     var isValid: Bool {
         !rpcEndpoint.isEmpty &&

@@ -37,6 +37,26 @@ struct SettingsView: View {
                         Text("\(minutes) \(minutes == 1 ? "minute" : "minutes")").tag(minutes)
                     }
                 }
+                
+                Toggle("Rate Limit RPC Requests", isOn: Binding(
+                    get: { config.enableRateLimiting ?? config.shouldRateLimit },
+                    set: { config.enableRateLimiting = $0 }
+                ))
+                .help("Auto-enabled for external RPCs.")
+                
+                if config.enableRateLimiting ?? config.shouldRateLimit {
+                    HStack {
+                        Text("Requests per second")
+                        Spacer()
+                        TextField("", value: Binding(
+                            get: { config.requestsPerSecond ?? 5 },
+                            set: { config.requestsPerSecond = $0 }
+                        ), format: .number)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 60)
+                        .multilineTextAlignment(.trailing)
+                    }
+                }
             }
 
             Section("Notifications") {
@@ -60,7 +80,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 450, height: 520)
+        .frame(width: 450, height: 560)
         .onChange(of: config) { _, _ in
             isSaved = false
         }
