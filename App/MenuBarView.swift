@@ -548,6 +548,9 @@ struct MenuBarView: View {
                 Image(systemName: "gear")
             }
             .buttonStyle(.borderless)
+            .simultaneousGesture(TapGesture().onEnded {
+                NSApp.activate(ignoringOtherApps: true)
+            })
 
             Button(action: {
                 NSApplication.shared.terminate(nil)
