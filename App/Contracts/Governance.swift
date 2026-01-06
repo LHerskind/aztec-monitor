@@ -7,7 +7,9 @@ struct Governance {
     private enum Selectors {
         static let proposalCount = "0xda35c664"
         static let totalPowerNow = "0x7f514e78"
+        static let totalPowerAt = "0xfe7f0e8b"
         static let getProposal = "0xc7f758a8"
+        static let getProposalState = "0x9080936f"
     }
 
     private enum PayloadSelectors {
@@ -23,6 +25,19 @@ struct Governance {
     func getTotalPowerNow() async throws -> Double {
         let result = try await client.call(to: address, data: Selectors.totalPowerNow)
         return ABI.parseUint256AsDouble(result, decimals: 18)
+    }
+
+    func getTotalPowerAt(timestamp: UInt64) async throws -> Double {
+        let calldata = Selectors.totalPowerAt + ABI.encodeUint256(timestamp)
+        let result = try await client.call(to: address, data: calldata)
+        return ABI.parseUint256AsDouble(result, decimals: 18)
+    }
+
+    func getProposalState(proposalId: UInt64) async throws -> ProposalState {
+        let calldata = Selectors.getProposalState + ABI.encodeUint256(proposalId)
+        let result = try await client.call(to: address, data: calldata)
+        let stateRaw = ABI.parseUint8(result, byteOffset: 0)
+        return ProposalState(rawValue: stateRaw) ?? .pending
     }
 
     func getProposal(proposalId: UInt64) async throws -> ProposalData {

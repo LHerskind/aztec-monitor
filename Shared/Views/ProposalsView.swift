@@ -287,8 +287,8 @@ struct ProposalRowView: View {
             )
             requirementIndicator(
                 label: "Min Power",
-                met: proposal.isMinimumPowerMet(totalPower: totalPower),
-                detail: String(format: "%@ (need %@)", formatPower(totalPower), formatPower(proposal.config.minimumVotes))
+                met: proposal.isMinimumPowerMet(),
+                detail: String(format: "%@ (need %@)", formatPower(proposal.snapshotPower ?? 0), formatPower(proposal.config.minimumVotes))
             )
             Spacer()
         }

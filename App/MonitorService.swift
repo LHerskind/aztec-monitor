@@ -91,6 +91,10 @@ struct MonitorService {
         for proposalId in proposalsToFetch {
             do {
                 var proposal = try await governance.getProposal(proposalId: proposalId)
+                proposal.state = try await governance.getProposalState(proposalId: proposalId)
+
+                let pendingThroughTimestamp = UInt64(proposal.pendingThrough.timeIntervalSince1970)
+                proposal.snapshotPower = try await governance.getTotalPowerAt(timestamp: pendingThroughTimestamp)
 
                 proposal.originalPayload = try await governance.getPayloadOriginalPayload(
                     payloadAddress: proposal.payloadAddress

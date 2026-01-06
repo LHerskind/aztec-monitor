@@ -5,7 +5,7 @@ import SwiftUI
 
 struct ProposalData: Codable, Equatable, Identifiable {
     let proposalId: UInt64
-    let state: ProposalState
+    var state: ProposalState
     let config: ProposalConfiguration
     let payloadAddress: String
     let proposerAddress: String
@@ -13,6 +13,7 @@ struct ProposalData: Codable, Equatable, Identifiable {
     let ballot: Ballot
     var originalPayload: String?
     var uri: String?
+    var snapshotPower: Double?
 
     var id: UInt64 { proposalId }
 
@@ -61,8 +62,9 @@ struct ProposalData: Codable, Equatable, Identifiable {
         return (1.0 + config.yeaMarginPercent / 100.0) / 2.0 * 100.0
     }
 
-    func isMinimumPowerMet(totalPower: Double) -> Bool {
-        return totalPower >= config.minimumVotes
+    func isMinimumPowerMet() -> Bool {
+        guard let power = snapshotPower else { return false }
+        return power >= config.minimumVotes
     }
 
     var pendingThrough: Date {
