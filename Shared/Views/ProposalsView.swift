@@ -277,8 +277,8 @@ struct ProposalRowView: View {
         HStack(spacing: 8) {
             requirementIndicator(
                 label: "Quorum",
-                met: proposal.isQuorumMet(totalPower: totalPower),
-                detail: String(format: "%.1f%% (need %.0f%%)", proposal.quorumProgress(totalPower: totalPower), proposal.config.quorumPercent)
+                met: proposal.isQuorumMet(),
+                detail: String(format: "%.1f%% (need %.0f%%)", proposal.quorumProgress(), proposal.config.quorumPercent)
             )
             requirementIndicator(
                 label: "Yea",

@@ -41,13 +41,14 @@ struct ProposalData: Codable, Equatable, Identifiable {
         return (ballot.nay / totalVotes) * 100
     }
 
-    func quorumProgress(totalPower: Double) -> Double {
-        guard totalPower > 0 else { return 0 }
-        return (totalVotes / totalPower) * 100
+    func quorumProgress() -> Double {
+        guard let power = snapshotPower, power > 0 else { return 0 }
+        return (totalVotes / power) * 100
     }
 
-    func isQuorumMet(totalPower: Double) -> Bool {
-        let requiredVotes = (config.quorumPercent / 100.0) * totalPower
+    func isQuorumMet() -> Bool {
+        guard let power = snapshotPower else { return false }
+        let requiredVotes = (config.quorumPercent / 100.0) * power
         return totalVotes >= requiredVotes
     }
 
